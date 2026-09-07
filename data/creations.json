@@ -1,15 +1,71 @@
 {
   "_commentaire": "Photos de la galerie (bandeau défilant). Modifiable depuis /admin → Galerie photos.",
   "creations": [
-    { "id": "ga1", "image": "assets/carrousel/img_0218.jpg", "nom": "Berli'Nyons photo 1", "visible": true },
-    { "id": "ga2", "image": "assets/carrousel/img_0227.jpg", "nom": "Berli'Nyons photo 2", "visible": true },
-    { "id": "ga3", "image": "assets/carrousel/img_0253.jpg", "nom": "Berli'Nyons photo 3", "visible": true },
-    { "id": "ga4", "image": "assets/carrousel/img_0264.jpg", "nom": "Berli'Nyons photo 4", "visible": true },
-    { "id": "ga5", "image": "assets/carrousel/img_0279.jpg", "nom": "Berli'Nyons photo 5", "visible": true },
-    { "id": "ga6", "image": "assets/carrousel/img_0299.jpg", "nom": "Berli'Nyons photo 6", "visible": true },
-    { "id": "ga7", "image": "assets/carrousel/img_0303.jpg", "nom": "Berli'Nyons photo 7", "visible": true },
-    { "id": "ga8", "image": "assets/carrousel/img_0304.jpg", "nom": "Berli'Nyons photo 8", "visible": true },
-    { "id": "ga9", "image": "assets/carrousel/img_0309.jpg", "nom": "Berli'Nyons photo 9", "visible": true },
-    { "id": "ga10", "image": "assets/carrousel/img_1725.jpg", "nom": "Berli'Nyons photo 10", "visible": true }
+    {
+      "id": "ga1",
+      "image": "assets/carrousel/img_0218.jpg",
+      "nom": "Berli'Nyons photo 1",
+      "visible": true
+    },
+    {
+      "id": "ga2",
+      "image": "assets/carrousel/img_0227.jpg",
+      "nom": "Berli'Nyons photo 2",
+      "visible": true
+    },
+    {
+      "id": "ga3",
+      "image": "assets/carrousel/img_0253.jpg",
+      "nom": "Berli'Nyons photo 3",
+      "visible": true
+    },
+    {
+      "id": "ga4",
+      "image": "assets/carrousel/img_0264.jpg",
+      "nom": "Berli'Nyons photo 4",
+      "visible": true
+    },
+    {
+      "id": "ga5",
+      "image": "assets/carrousel/img_0279.jpg",
+      "nom": "Berli'Nyons photo 5",
+      "visible": true
+    },
+    {
+      "id": "ga6",
+      "image": "assets/carrousel/img_0299.jpg",
+      "nom": "Berli'Nyons photo 6",
+      "visible": true
+    },
+    {
+      "id": "ga7",
+      "image": "assets/carrousel/img_0303.jpg",
+      "nom": "Berli'Nyons photo 7",
+      "visible": true
+    },
+    {
+      "id": "ga8",
+      "image": "assets/carrousel/img_0304.jpg",
+      "nom": "Berli'Nyons photo 8",
+      "visible": true
+    },
+    {
+      "id": "ga9",
+      "image": "assets/carrousel/img_0309.jpg",
+      "nom": "Berli'Nyons photo 9",
+      "visible": true
+    },
+    {
+      "id": "ga10",
+      "image": "assets/carrousel/img_1725.jpg",
+      "nom": "Berli'Nyons photo 10",
+      "visible": true
+    },
+    {
+      "nom": "",
+      "visible": true,
+      "image": "assets/uploads/1788797492016_logo-8et4.png",
+      "id": "ga1788797499041"
+    }
   ]
 }
