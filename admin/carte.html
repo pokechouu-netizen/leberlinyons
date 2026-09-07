@@ -109,6 +109,7 @@
           <img id="format_photoImg" style="display:none" alt="">
         </div>
         <p class="photo-slot__hint" id="format_photoHint" style="text-align:left">PNG ou JPG.</p>
+        <button type="button" class="recrop-link" onclick="recrop('format')">✂️ Recadrer la photo actuelle</button>
       </div>
       <div class="frow">
         <div class="fg"><label>Nom *</label><input type="text" id="fo_nom" placeholder="Ex : Pain Boulanger"></div>
@@ -177,6 +178,7 @@
           <img id="aussi_photoImg" style="display:none" alt="">
         </div>
         <p class="photo-slot__hint" id="aussi_photoHint" style="text-align:left">PNG ou JPG.</p>
+        <button type="button" class="recrop-link" onclick="recrop('aussi')">✂️ Recadrer la photo actuelle</button>
       </div>
       <div class="fg"><label>Nom *</label><input type="text" id="au_nom" placeholder="Ex : Nos Poutines"></div>
       <div class="fg"><label>Description</label><textarea id="au_desc" rows="3"></textarea></div>
@@ -197,6 +199,7 @@
   </div>
 
   <script src="cms.js"></script>
+  <script src="cropper.js"></script>
   <script>
   (function () {
     'use strict';
@@ -248,14 +251,23 @@
       if (path) { img.src = CMS.imgSrc(path); img.style.display = 'block'; empty.style.display = 'none'; }
       else { img.style.display = 'none'; empty.style.display = 'flex'; }
     }
-    window.onUpload = function (input, kind) {
-      if (!input.files || !input.files[0]) return;
+    var CROP = { format: { ratio: 16 / 10, title: 'Photo du format' }, aussi: { ratio: 16 / 9, title: 'Photo de la spécialité' } };
+    function currentImage(kind) {
+      if (pending[kind]) return pending[kind];
+      if (kind === 'format') return (edit.format !== -1 && data.formats[edit.format]) ? data.formats[edit.format].image : '';
+      if (kind === 'aussi') return (edit.aussi !== -1 && data.aussi[edit.aussi]) ? data.aussi[edit.aussi].image : '';
+      return '';
+    }
+    function runUpload(kind, src) {
       var hint = document.getElementById(kind + '_photoHint');
-      CMS.localPreview(input.files[0], input.parentNode);
-      hint.textContent = 'Téléversement…';
-      CMS.uploadImage(input.files[0]).then(function (p) { pending[kind] = p; setPhoto(kind, p); hint.textContent = 'Photo prête ✓ — cliquez « Enregistrer ».'; })
-        .catch(function (e) { hint.textContent = 'Erreur de téléversement'; console.error(e); });
-    };
+      var wrap = document.getElementById(kind + '_photoImg').parentNode;
+      CMS.pickAndUpload(src, CROP[kind], wrap, hint).then(function (p) {
+        if (!p) return;
+        pending[kind] = p; setPhoto(kind, p); hint.textContent = 'Photo prête ✓ — cliquez « Enregistrer ».';
+      });
+    }
+    window.onUpload = function (input, kind) { var f = input.files && input.files[0]; input.value = ''; if (f) runUpload(kind, f); };
+    window.recrop = function (kind) { var cur = currentImage(kind); if (cur) runUpload(kind, CMS.imgSrc(cur)); };
 
     function actions(list, i, openFn, delFn, moveFn) {
       return '<div class="item-card__actions">' +

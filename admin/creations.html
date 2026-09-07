@@ -51,6 +51,7 @@
           <img id="photoImg" style="display:none" alt="">
         </div>
         <p class="photo-slot__hint" id="photoHint" style="text-align:left">JPG ou PNG. Cliquez pour remplacer.</p>
+        <button type="button" class="recrop-link" onclick="recrop()">✂️ Recadrer la photo actuelle</button>
       </div>
 
       <div class="fg">
@@ -72,6 +73,7 @@
   </div>
 
   <script src="cms.js"></script>
+  <script src="cropper.js"></script>
   <script>
   (function () {
     'use strict';
@@ -143,14 +145,21 @@
       else { img.style.display = 'none'; empty.style.display = 'flex'; }
     }
 
-    window.onPhoto = function (input) {
-      if (!input.files || !input.files[0]) return;
+    var CROP = { ratio: 4 / 3, title: 'Photo de la galerie' };
+    function runPhoto(src) {
       var hint = document.getElementById('photoHint');
-      CMS.localPreview(input.files[0], input.parentNode);
-      hint.textContent = 'Téléversement…';
-      CMS.uploadImage(input.files[0]).then(function (path) {
+      CMS.pickAndUpload(src, CROP, document.getElementById('photoWrap'), hint).then(function (path) {
+        if (!path) return;
         pendingImg = path; setPhoto(path); hint.textContent = 'Photo prête ✓ — cliquez « Enregistrer ».';
-      }).catch(function (e) { hint.textContent = 'Erreur de téléversement'; console.error(e); });
+      });
+    }
+    window.onPhoto = function (input) {
+      var f = input.files && input.files[0]; input.value = '';
+      if (f) runPhoto(f);
+    };
+    window.recrop = function () {
+      var cur = pendingImg || (edit !== -1 && data.creations[edit] ? data.creations[edit].image : '');
+      if (cur) runPhoto(CMS.imgSrc(cur));
     };
 
     window.saveItem = function () {

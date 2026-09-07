@@ -137,6 +137,7 @@
           <img id="parcours_photoImg" style="display:none" alt="">
         </div>
         <p class="photo-slot__hint" id="parcours_photoHint" style="text-align:left">JPG ou PNG. <a href="#" onclick="removePhoto('parcours');return false;">Retirer la photo</a></p>
+        <button type="button" class="recrop-link" onclick="recrop('parcours')">✂️ Recadrer la photo actuelle</button>
       </div>
       <div class="fg">
         <label>Cadrage vertical de la photo</label>
@@ -169,6 +170,7 @@
           <img id="artiste_photoImg" style="display:none" alt="">
         </div>
         <p class="photo-slot__hint" id="artiste_photoHint" style="text-align:left">JPG ou PNG.</p>
+        <button type="button" class="recrop-link" onclick="recrop('artiste')">✂️ Recadrer l'image actuelle</button>
       </div>
       <div class="fg" style="flex-direction:row;align-items:center;gap:.5rem">
         <input type="checkbox" id="ar_logo" style="width:auto" onchange="document.getElementById('ar_photoWrap').classList.toggle('contain',this.checked)">
@@ -191,6 +193,7 @@
   </div>
 
   <script src="cms.js"></script>
+  <script src="cropper.js"></script>
   <script>
   (function () {
     'use strict';
@@ -287,14 +290,36 @@
       if (path) { img.src = CMS.imgSrc(path); img.style.display = 'block'; empty.style.display = 'none'; }
       else { img.style.display = 'none'; empty.style.display = 'flex'; }
     }
-    window.onUpload = function (input, kind) {
-      if (!input.files || !input.files[0]) return;
-      var hint = document.getElementById(kind + '_photoHint');
-      CMS.localPreview(input.files[0], input.parentNode);
-      hint.textContent = 'Téléversement…';
-      CMS.uploadImage(input.files[0]).then(function (p) { pending[kind] = p; removed[kind] = false; setPhoto(kind, p); hint.textContent = 'Photo prête ✓ — cliquez « Enregistrer ».'; })
-        .catch(function (e) { hint.textContent = 'Erreur de téléversement'; console.error(e); });
+    /* ---- Recadrage : proportions recommandées par emplacement ---- */
+    var CROP_KEY = {
+      logo: { ratio: 1, png: true, title: 'Logo' },
+      logo_flottant: { ratio: 'free', png: true, title: 'Logo flottant' },
+      hero_fond: { ratio: 16 / 9, title: 'Image de fond de l\'accueil' },
+      hero_photo: { ratio: 4 / 5, title: 'Photo principale de l\'accueil' },
+      hero_broche: { ratio: 'free', png: true, title: 'Broche décorative' }
     };
+    var CROP_CARTE = { formats: { ratio: 16 / 10, title: 'Photo du format' }, aussi: { ratio: 16 / 9, title: 'Photo de la spécialité' } };
+    var CROP_GAL = { ratio: 4 / 3, title: 'Photo de la galerie' };
+    function cropOptsParcours() { return { ratio: 7 / 3, title: 'Photo de l\'étape' }; }
+    function cropOptsArtiste(isLogo) { return isLogo ? { ratio: 'free', png: true, title: 'Logo' } : { ratio: 4 / 3, title: 'Photo de l\'artiste' }; }
+
+    function currentImage(kind) {
+      if (pending[kind]) return pending[kind];
+      if (kind === 'parcours') return (!removed.parcours && edit.parcours !== -1 && data.parcours[edit.parcours]) ? data.parcours[edit.parcours].image : '';
+      if (kind === 'artiste') return (edit.artiste !== -1 && data.artistes[edit.artiste]) ? data.artistes[edit.artiste].image : '';
+      return '';
+    }
+    function runUpload(kind, src) {
+      var hint = document.getElementById(kind + '_photoHint');
+      var wrap = document.getElementById(kind + '_photoImg').parentNode;
+      var opts = kind === 'parcours' ? cropOptsParcours() : cropOptsArtiste(document.getElementById('ar_logo').checked);
+      CMS.pickAndUpload(src, opts, wrap, hint).then(function (p) {
+        if (!p) return;
+        pending[kind] = p; removed[kind] = false; setPhoto(kind, p); hint.textContent = 'Photo prête ✓ — cliquez « Enregistrer ».';
+      });
+    }
+    window.onUpload = function (input, kind) { var f = input.files && input.files[0]; input.value = ''; if (f) runUpload(kind, f); };
+    window.recrop = function (kind) { var cur = currentImage(kind); if (cur) runUpload(kind, CMS.imgSrc(cur)); };
     window.removePhoto = function (kind) { pending[kind] = null; removed[kind] = true; setPhoto(kind, ''); };
 
     function actions(list, i, openFn, delFn, moveFn) {
@@ -328,16 +353,18 @@
     };
 
     /* ---------- PHOTOS (toutes au même endroit) ---------- */
-    function slot(label, src, onchangeAttr, contain) {
+    function slot(label, src, call, contain) {
       return '<div class="photo-slot"><span class="photo-slot__label">' + CMS.eh(label) + '</span>' +
-        '<div class="photo-slot__wrap' + (contain ? ' contain' : '') + '"><input type="file" accept="image/*" onchange="' + onchangeAttr + '">' +
+        '<div class="photo-slot__wrap' + (contain ? ' contain' : '') + '"><input type="file" accept="image/*" onchange="' + call + '">' +
         (src ? '<img src="' + CMS.esc(CMS.imgSrc(src)) + '" alt="">' : '<div class="photo-slot__empty">📷<span>Cliquer pour ajouter</span></div>') +
-        '</div><p class="photo-slot__hint">Cliquer pour remplacer</p></div>';
+        '</div><p class="photo-slot__hint">Cliquer pour remplacer</p>' +
+        (src ? '<button type="button" class="btn btn-ghost btn-sm photo-slot__crop" onclick="' + call + '">✂️ Recadrer</button>' : '') +
+        '</div>';
     }
     function renderPhotos() {
       var c = document.getElementById('photosContainer'); if (!data.photos) return;
       var html = '<p class="photos-section-title">🏠 Photos clés</p><div class="photos-grid">';
-      Object.keys(PHOTOS).forEach(function (k) { html += slot(PHOTOS[k], data.photos[k] || '', 'replaceKey(this,\'' + k + '\')', /logo/.test(k)); });
+      Object.keys(PHOTOS).forEach(function (k) { html += slot(PHOTOS[k], data.photos[k] || '', 'replaceKey(this,\'' + k + '\')', /logo|broche/.test(k)); });
       html += '</div>';
       if (carte) {
         html += '<p class="photos-section-title">🍞 Formats</p><div class="photos-grid">';
@@ -358,37 +385,48 @@
       }
       c.innerHTML = html;
     }
-    function upload(input) {
-      if (!input.files || !input.files[0]) return null;
-      CMS.localPreview(input.files[0], input.parentNode);
-      CMS.status('saving', 'Téléversement…');
-      return CMS.uploadImage(input.files[0]);
+    // Source du recadrage : le fichier choisi (input) ou l'image actuelle (bouton « Recadrer »)
+    function srcFrom(el, current) {
+      if (el && el.tagName === 'INPUT') { var f = el.files && el.files[0]; el.value = ''; return f || null; }
+      return current ? CMS.imgSrc(current) : null;
     }
-    window.replaceKey = function (input, key) {
-      var up = upload(input); if (!up) return;
-      up.then(function (path) { data.photos[key] = path; return persist('Photo : ' + (PHOTOS[key] || key)); }).then(renderPhotos)
-        .catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
+    function wrapOf(el) { var s = el && el.closest ? el.closest('.photo-slot') : null; return s ? s.querySelector('.photo-slot__wrap') : null; }
+    function pick(el, current, opts) {
+      var src = srcFrom(el, current); if (!src) return Promise.resolve(null);
+      CMS.status('saving', 'Recadrage…');
+      return CMS.pickAndUpload(src, opts, wrapOf(el), null).then(function (path) { if (!path) CMS.status('', ''); return path; });
+    }
+    function saveOther(file, obj, shaGetter, shaSetter, msg) {
+      CMS.status('saving', 'Enregistrement…');
+      return CMS.save(file, obj, shaGetter(), msg).then(function (ns) {
+        shaSetter(ns); CMS.status('saved', 'Enregistré ✓'); setTimeout(function () { CMS.status('', ''); }, 3000);
+      });
+    }
+    window.replaceKey = function (el, key) {
+      pick(el, data.photos[key], CROP_KEY[key] || {}).then(function (path) {
+        if (!path) return; data.photos[key] = path; return persist('Photo : ' + (PHOTOS[key] || key)).then(renderPhotos);
+      }).catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
     };
-    window.replaceList = function (input, list, i) {
-      var up = upload(input); if (!up) return;
-      up.then(function (path) { data[list][i].image = path; return persist('Photo ' + list + ' : ' + (data[list][i].nom || data[list][i].titre || i)); }).then(renderPhotos)
-        .catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
+    window.replaceList = function (el, list, i) {
+      var item = data[list][i];
+      var opts = list === 'parcours' ? cropOptsParcours() : cropOptsArtiste(!!item.logo);
+      pick(el, item.image, opts).then(function (path) {
+        if (!path) return; item.image = path; return persist('Photo ' + list + ' : ' + (item.nom || item.titre || i)).then(renderPhotos);
+      }).catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
     };
-    window.replaceCarte = function (input, list, i) {
-      var up = upload(input); if (!up) return;
-      up.then(function (path) {
-        carte[list][i].image = path; CMS.status('saving', 'Enregistrement…');
-        return CMS.save(CARTE_FILE, carte, carteSha, 'Photo carte : ' + (carte[list][i].nom || i));
-      }).then(function (ns) { carteSha = ns; CMS.status('saved', 'Enregistré ✓'); setTimeout(function () { CMS.status('', ''); }, 3000); renderPhotos(); })
-        .catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
+    window.replaceCarte = function (el, list, i) {
+      var item = carte[list][i];
+      pick(el, item.image, CROP_CARTE[list] || {}).then(function (path) {
+        if (!path) return; item.image = path;
+        return saveOther(CARTE_FILE, carte, function () { return carteSha; }, function (v) { carteSha = v; }, 'Photo carte : ' + (item.nom || i)).then(renderPhotos);
+      }).catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
     };
-    window.replaceGal = function (input, i) {
-      var up = upload(input); if (!up) return;
-      up.then(function (path) {
-        gal.creations[i].image = path; CMS.status('saving', 'Enregistrement…');
-        return CMS.save(GAL_FILE, gal, galSha, 'Photo galerie #' + (i + 1));
-      }).then(function (ns) { galSha = ns; CMS.status('saved', 'Enregistré ✓'); setTimeout(function () { CMS.status('', ''); }, 3000); renderPhotos(); })
-        .catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
+    window.replaceGal = function (el, i) {
+      var item = gal.creations[i];
+      pick(el, item.image, CROP_GAL).then(function (path) {
+        if (!path) return; item.image = path;
+        return saveOther(GAL_FILE, gal, function () { return galSha; }, function (v) { galSha = v; }, 'Photo galerie #' + (i + 1)).then(renderPhotos);
+      }).catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
     };
 
     /* ---------- AVIS ---------- */
