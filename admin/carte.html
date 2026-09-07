@@ -250,7 +250,9 @@
     }
     window.onUpload = function (input, kind) {
       if (!input.files || !input.files[0]) return;
-      var hint = document.getElementById(kind + '_photoHint'); hint.textContent = 'Téléversement…';
+      var hint = document.getElementById(kind + '_photoHint');
+      CMS.localPreview(input.files[0], input.parentNode);
+      hint.textContent = 'Téléversement…';
       CMS.uploadImage(input.files[0]).then(function (p) { pending[kind] = p; setPhoto(kind, p); hint.textContent = 'Photo prête ✓ — cliquez « Enregistrer ».'; })
         .catch(function (e) { hint.textContent = 'Erreur de téléversement'; console.error(e); });
     };

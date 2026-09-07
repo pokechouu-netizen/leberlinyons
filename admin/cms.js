@@ -9,6 +9,10 @@
   var GIT = '/.netlify/git/github/contents/';
   var BRANCH = 'main';
   var hookUrl = null;
+  // Aperçus locaux : chemin dans le dépôt → URL blob du fichier choisi.
+  // Une image téléversée n'est visible en ligne qu'après le redéploiement (~1 min) ;
+  // en attendant, on affiche le fichier local.
+  var localPreviews = {};
 
   function jwt() {
     var u = (global.netlifyIdentity && netlifyIdentity.currentUser());
@@ -72,6 +76,7 @@
         var b64 = e.target.result.split(',')[1];
         var name = Date.now() + '_' + file.name.replace(/[^a-z0-9.\-_]/gi, '-').toLowerCase();
         var path = folder + '/' + name;
+        try { localPreviews[path] = URL.createObjectURL(file); } catch (err) {}
         gitPutRaw(path, { message: 'Image : ' + name, content: b64 })
           .then(function () { resolve(path); }).catch(reject);
       };
@@ -111,8 +116,19 @@
   // Résout un chemin image relatif au site, pour l'afficher depuis /admin/
   function imgSrc(path) {
     if (!path) return '';
-    if (/^(https?:|\/|data:)/.test(path)) return path;
+    if (localPreviews[path]) return localPreviews[path];
+    if (/^(https?:|\/|data:|blob:)/.test(path)) return path;
     return '../' + path;
+  }
+  // Affiche immédiatement le fichier choisi dans un emplacement photo (.photo-slot__wrap ou équivalent)
+  function localPreview(file, wrap) {
+    if (!file || !wrap) return;
+    var url; try { url = URL.createObjectURL(file); } catch (err) { return; }
+    var img = wrap.querySelector('img');
+    var empty = wrap.querySelector('.photo-slot__empty');
+    if (!img) { img = document.createElement('img'); img.alt = ''; wrap.appendChild(img); }
+    img.src = url; img.style.display = 'block';
+    if (empty) empty.style.display = 'none';
   }
   // Statut visuel (#statusEl)
   function status(type, msg) {
@@ -127,6 +143,6 @@
     requireAuth: requireAuth,
     login: function () { netlifyIdentity.open(); },
     logout: function () { netlifyIdentity.logout(); },
-    esc: esc, eh: eh, imgSrc: imgSrc, status: status
+    esc: esc, eh: eh, imgSrc: imgSrc, localPreview: localPreview, status: status
   };
 })(window);

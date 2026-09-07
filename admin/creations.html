@@ -146,6 +146,7 @@
     window.onPhoto = function (input) {
       if (!input.files || !input.files[0]) return;
       var hint = document.getElementById('photoHint');
+      CMS.localPreview(input.files[0], input.parentNode);
       hint.textContent = 'Téléversement…';
       CMS.uploadImage(input.files[0]).then(function (path) {
         pendingImg = path; setPhoto(path); hint.textContent = 'Photo prête ✓ — cliquez « Enregistrer ».';
