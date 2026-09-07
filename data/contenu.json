@@ -1,0 +1,192 @@
+{
+  "_commentaire": "Textes, photos, avis, parcours et artistes du site. Modifiable depuis /admin → Contenu.",
+  "textes": {
+    "hero_badge": "Nyons • Drôme Provençale",
+    "hero_title": "Le vrai goût du",
+    "hero_title_accent": "döner artisanal",
+    "hero_sub": "Viande fraîche marinée 24h, pain frais boulanger, sauces exclusives. Le kebab qu'on recommande.",
+    "hero_stat_clients": "500",
+    "hero_stat_annees": "3",
+    "hero_note_google": "4.9",
+    "hero_horaires_resume": "12h-14h30 / 19h-22h",
+    "hero_image_badge": "Signature",
+
+    "menu_title": "Des recettes généreuses",
+    "menu_sub": "Préparées avec des ingrédients frais, chaque jour.",
+    "menu_prix_base": "9,90€",
+    "recettes_sub": "Disponibles en Pain Boulanger, Galette Wrap ou Assiette",
+
+    "aussi_title": "Le Berli', c'est aussi...",
+    "aussi_sub": "Des poutines généreuses et des mezzés à partager entre amis !",
+
+    "parcours_title": "Le parcours de Théodore & Dorian",
+    "parcours_intro": "C'est l'histoire de Dorian et Théodore, amis depuis la maternelle, réunis par la cuisine et le voyage. Ils partent en Turquie pour apprendre le vrai sens du kebab.\nChez Berli', tout est fait maison, influencée par le bassin méditerranéen, leur cuisine veut redonner ses lettres de noblesse au kebab.\nBerli', c'est plus qu'un lieu pour manger : c'est une communauté, une culture, et beaucoup d'amour.",
+
+    "artistes_title": "Artistes qu'on aime",
+    "artistes_sub": "La musique qui tourne au Berli.",
+
+    "galerie_title": "Galerie",
+    "galerie_sub": "Découvrez nos créations et l'ambiance du Berli'Nyons.",
+
+    "avis_title": "Ce qu'en disent nos clients",
+
+    "services_title": "Traiteur, événementiel & location",
+    "services_sub": "Le Berli'Nyons se déplace aussi chez vous.",
+    "service1_title": "Service traiteur & food truck",
+    "service1_desc": "Mariages, anniversaires, événements d'entreprise... Notre food truck se déplace pour régaler vos invités avec nos recettes artisanales. Döner fraîchement découpé, préparé devant vos yeux.",
+    "service1_bouton": "Demander un devis",
+    "service2_title": "Location de machines à broche",
+    "service2_desc": "Louez nos machines à broche professionnelles, avec ou sans la broche fraîche montée selon votre demande. Idéal pour vos événements privés, fêtes ou rassemblements entre amis.",
+    "service2_bouton": "Nous contacter",
+
+    "communaute_title": "Les amis du Berli",
+    "communaute_sub": "Nos clients, nos potes, notre famille. Rejoins la team sur Facebook !",
+
+    "contact_title": "Contact & Horaires"
+  },
+  "photos": {
+    "logo": "assets/logo-hd.jpg",
+    "logo_flottant": "assets/logotransparent.png",
+    "hero_fond": "assets/hero.jpg",
+    "hero_photo": "assets/kebab1.jpg",
+    "hero_broche": "assets/kebab seul.png"
+  },
+  "avis": [
+    {
+      "id": "av1",
+      "texte": "Une cuisine délicieuse, une ambiance très sympa avec un personnel qui accepte avec sourire toutes nos fantaisies.",
+      "auteur": "Madeleine VERNET",
+      "note": 5,
+      "source": "Avis Google"
+    },
+    {
+      "id": "av2",
+      "texte": "Tout fait maison et dans la bonne humeur, une personne accueillante comme il est rare aujourd'hui. Je recommande car niveau qualité alimentaire et prix, on ne peut avoir mieux !",
+      "auteur": "Claire Chevremont",
+      "note": 5,
+      "source": "Avis Google"
+    },
+    {
+      "id": "av3",
+      "texte": "Meilleur snack de France ! Très sympathique, ambiance incroyable, nourriture délicieuse ! Beau placement au soleil.",
+      "auteur": "Loan Gobyn",
+      "note": 5,
+      "source": "Avis Google"
+    }
+  ],
+  "parcours": [
+    {
+      "id": "pa1",
+      "date": "Janvier 2023",
+      "titre": "L'idée naissante 💡",
+      "texte": "Dorian et Théodore imaginent le concept : un kebab artisanal, fait maison, inspiré de la Méditerranée.",
+      "image": "",
+      "cadrage": 50,
+      "visible": true
+    },
+    {
+      "id": "pa2",
+      "date": "Mars 2023",
+      "titre": "Direction Istanbul",
+      "texte": "Départ pour la Turquie. Immersion totale pour apprendre le vrai sens du kebab auprès des maîtres kebabiers. Inspiré par le savoir-faire Turc et la cuisine méditerranéenne.",
+      "image": "assets/parcours-1.jpg",
+      "cadrage": 75,
+      "visible": true
+    },
+    {
+      "id": "pa3",
+      "date": "Mai 2023",
+      "titre": "Ouverture du Berli'Nyons",
+      "texte": "Le grand jour ! Les portes du 28 rue des Grands Forts s'ouvrent. Nyons découvre enfin le vrai goût du döner artisanal.",
+      "image": "assets/parcours-4.jpg",
+      "cadrage": 35,
+      "visible": true
+    },
+    {
+      "id": "pa4",
+      "date": "Été 2024",
+      "titre": "Marion rejoint l'équipe",
+      "texte": "L'équipe s'agrandit. Marion apporte son énergie et sa passion au Berli'.",
+      "image": "assets/parcours-3.jpg",
+      "cadrage": 15,
+      "visible": true
+    },
+    {
+      "id": "pa5",
+      "date": "Été 2025",
+      "titre": "Xander rejoint l'équipe 🤝",
+      "texte": "La famille Berli' continue de grandir. L'aventure est loin d'être terminée !",
+      "image": "assets/xander.jpeg",
+      "cadrage": 20,
+      "visible": true
+    }
+  ],
+  "artistes": [
+    {
+      "id": "ar1",
+      "nom": "Radio Krimi",
+      "desc": "Webradio indépendante entre Chamonix et Paris. Soul, Funk, Hip Hop, Jazz, Reggae... Sans pub, sans blabla, 24h/24.",
+      "image": "assets/radio-krimi.jpg",
+      "logo": false,
+      "categorie": "Webradio",
+      "url": "https://www.google.com/search?q=Radio+Krimi",
+      "bouton": "Écouter",
+      "visible": true
+    },
+    {
+      "id": "ar2",
+      "nom": "Huit & Quatre",
+      "desc": "",
+      "image": "assets/logo-8et4.png",
+      "logo": true,
+      "categorie": "",
+      "url": "https://youtu.be/ZRAvo7rSO2Y?si=RYJ_V4Hr_eedhHrZ",
+      "bouton": "Écouter",
+      "visible": true
+    },
+    {
+      "id": "ar3",
+      "nom": "Les miels du Max",
+      "desc": "Apiculteur passionné en Drôme provençale. Miel de lavande, garrigue et châtaignier — 100 % artisanal, récolté à la main.",
+      "image": "assets/les-miels-du-max.png",
+      "logo": true,
+      "categorie": "",
+      "url": "https://www.saslesruchesdemax.fr/",
+      "bouton": "",
+      "visible": true
+    },
+    {
+      "id": "ar4",
+      "nom": "Lionel",
+      "desc": "Vibrations Diffusion — diffusion musicale et événementiel en Drôme provençale.",
+      "image": "assets/logo-lionel.png",
+      "logo": true,
+      "categorie": "",
+      "url": "https://vibrationsdiffusion.com/",
+      "bouton": "",
+      "visible": true
+    },
+    {
+      "id": "ar5",
+      "nom": "Carine Azar",
+      "desc": "Artiste pluridisciplinaire. Retrouvez son univers, ses créations et ses actualités.",
+      "image": "assets/carine-azar.jpg",
+      "logo": false,
+      "categorie": "Artiste",
+      "url": "https://linktr.ee/CarineOumouchi",
+      "bouton": "",
+      "visible": true
+    },
+    {
+      "id": "ar6",
+      "nom": "Les Passerelles – distillerie de lavande",
+      "desc": "Distillerie artisanale de lavande au cœur de la Drôme. Huiles essentielles, hydrolats et produits naturels, cultivés et distillés sur place.",
+      "image": "assets/les-passerelles.png",
+      "logo": true,
+      "categorie": "",
+      "url": "",
+      "bouton": "",
+      "visible": true
+    }
+  ]
+}

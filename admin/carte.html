@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>La carte — Admin Le Berli'Nyons</title>
+  <link rel="icon" href="../assets/logo-hd.jpg">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    .rows { display: flex; flex-direction: column; gap: .5rem; }
+    .row { display: grid; grid-template-columns: 2fr 1fr 2fr auto auto; gap: .5rem; align-items: center; }
+    .row.row--2 { grid-template-columns: 2fr 1fr auto; }
+    .row input { padding: .5rem .65rem; border: 1.5px solid var(--border); border-radius: 7px; font-size: .9rem; font-family: inherit; width: 100%; }
+    .row input:focus { border-color: var(--gold); outline: none; }
+    .row label.radio { font-size: .72rem; color: var(--muted); display: flex; align-items: center; gap: .25rem; white-space: nowrap; }
+    @media (max-width: 640px) { .row { grid-template-columns: 1fr 1fr; } .row.row--2 { grid-template-columns: 1fr 1fr; } }
+    .thumb--wide { width: 90px !important; height: 70px !important; }
+  </style>
+</head>
+<body>
+
+  <div id="loginScreen">
+    <div class="brand">Le Berli'Nyons</div>
+    <h1>La carte &amp; les prix</h1>
+    <p>Connectez-vous pour modifier les formats, recettes, menus et prix.</p>
+    <button class="btn-login" onclick="CMS.login()">Se connecter</button>
+  </div>
+
+  <div id="adminScreen">
+    <div class="topbar">
+      <h1>🥙 La carte &amp; les prix</h1>
+      <span class="status" id="statusEl"></span>
+      <a href="index.html" class="btn btn-ghost btn-sm">← Admin</a>
+      <a href="../index.html#menu" target="_blank" class="btn btn-ghost btn-sm">Voir le site ↗</a>
+      <button class="btn-text" onclick="CMS.logout()">Déconnexion</button>
+    </div>
+
+    <div class="tabs-wrap">
+      <div class="tabs">
+        <button class="tab active" data-tab="formats" onclick="switchTab('formats',this)">🍞 Formats</button>
+        <button class="tab" data-tab="recettes" onclick="switchTab('recettes',this)">🥙 Recettes</button>
+        <button class="tab" data-tab="formules" onclick="switchTab('formules',this)">🍟 Menus &amp; suppléments</button>
+        <button class="tab" data-tab="aussi" onclick="switchTab('aussi',this)">🧀 Poutines &amp; mezzés</button>
+      </div>
+    </div>
+
+    <!-- FORMATS -->
+    <div class="panel active" id="panel-formats">
+      <div class="panel-header">
+        <h2>Étape 1 — Choisis ton format</h2>
+        <button class="btn btn-primary btn-sm" onclick="openFormat(-1)">+ Ajouter un format</button>
+      </div>
+      <p class="panel-hint">Les formats (Pain Boulanger, Galette Wrap, Assiette…) avec leur photo, prix et description. Le format avec un « badge » (ex : Populaire) est mis en avant. Le prix de départ affiché au-dessus (« Tout commence à… ») se règle dans <a href="contenu.html?tab=textes">Textes du site</a>.</p>
+      <div class="card-list" id="formatsList"><div class="loading">Chargement…</div></div>
+    </div>
+
+    <!-- RECETTES -->
+    <div class="panel" id="panel-recettes">
+      <div class="panel-header">
+        <h2>Étape 2 — Choisis ta recette</h2>
+        <button class="btn btn-primary btn-sm" onclick="openRecette(-1)">+ Ajouter une recette</button>
+      </div>
+      <p class="panel-hint">Les recettes du carrousel (Berli, Classi, Carni…). Les ingrédients s'écrivent <strong>un par ligne</strong> ; une petite icône est choisie automatiquement selon l'ingrédient (viande, poulet, feta, sauce…).</p>
+      <div class="card-list" id="recettesList"><div class="loading">Chargement…</div></div>
+    </div>
+
+    <!-- FORMULES -->
+    <div class="panel" id="panel-formules">
+      <div class="section-card">
+        <p class="section-card__title">🍟 Étape 3 — Les menus</p>
+        <p class="panel-hint">Nom, prix et composition de chaque formule. Cochez « Mis en avant » pour la formule à mettre en valeur.</p>
+        <div class="rows" id="formulesRows"></div>
+        <div style="margin-top:.75rem"><button class="btn btn-ghost btn-sm" onclick="addFormule()">+ Ajouter une formule</button></div>
+      </div>
+      <div class="section-card">
+        <p class="section-card__title">➕ Suppléments</p>
+        <p class="panel-hint">Affichés sous les menus (ex : Sup. Légumes +0,50€).</p>
+        <div class="rows" id="supRows"></div>
+        <div style="margin-top:.75rem"><button class="btn btn-ghost btn-sm" onclick="addSup()">+ Ajouter un supplément</button></div>
+      </div>
+      <div class="form-save-row">
+        <button class="btn btn-primary" id="saveFormulesBtn" onclick="saveFormules()">Enregistrer les menus &amp; suppléments</button>
+      </div>
+    </div>
+
+    <!-- AUSSI -->
+    <div class="panel" id="panel-aussi">
+      <div class="panel-header">
+        <h2>« Le Berli', c'est aussi… »</h2>
+        <button class="btn btn-primary btn-sm" onclick="openAussi(-1)">+ Ajouter une spécialité</button>
+      </div>
+      <p class="panel-hint">Les cartes Poutines / Mezzés : photo, nom, description et les prix (plusieurs tailles possibles).</p>
+      <div class="card-list" id="aussiList"><div class="loading">Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- Modal FORMAT -->
+  <div class="overlay" id="overlayFormat">
+    <div class="modal" role="dialog">
+      <button class="modal-close" onclick="closeM('overlayFormat')">&times;</button>
+      <h2 id="formatTitle">Nouveau format</h2>
+      <div class="fg">
+        <label>Photo</label>
+        <div class="photo-slot__wrap" style="max-width:220px">
+          <input type="file" accept="image/*" onchange="onUpload(this,'format')">
+          <div class="photo-slot__empty" id="format_photoEmpty">📷<span>Cliquer pour choisir</span></div>
+          <img id="format_photoImg" style="display:none" alt="">
+        </div>
+        <p class="photo-slot__hint" id="format_photoHint" style="text-align:left">PNG ou JPG.</p>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Nom *</label><input type="text" id="fo_nom" placeholder="Ex : Pain Boulanger"></div>
+        <div class="fg"><label>Prix</label><input type="text" id="fo_prix" placeholder="9,90€"></div>
+      </div>
+      <div class="fg"><label>Badge (facultatif)</label><input type="text" id="fo_badge" placeholder="Ex : Populaire"><span class="hint">Un badge met le format en avant.</span></div>
+      <div class="fg"><label>Description</label><textarea id="fo_desc" rows="4"></textarea></div>
+      <div class="fg" style="flex-direction:row;align-items:center;gap:.5rem">
+        <input type="checkbox" id="fo_visible" checked style="width:auto">
+        <label for="fo_visible" style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--ink)">Visible sur le site</label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeM('overlayFormat')">Annuler</button>
+        <button class="btn btn-primary" id="formatSaveBtn" onclick="saveFormat()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal RECETTE -->
+  <div class="overlay" id="overlayRecette">
+    <div class="modal" role="dialog">
+      <button class="modal-close" onclick="closeM('overlayRecette')">&times;</button>
+      <h2 id="recetteTitle">Nouvelle recette</h2>
+      <div class="frow">
+        <div class="fg"><label>Nom *</label><input type="text" id="re_nom" placeholder="Ex : Berli"></div>
+        <div class="fg"><label>Badge</label><input type="text" id="re_badge" placeholder="Ex : La signature"></div>
+      </div>
+      <div class="fg">
+        <label>Couleur du badge</label>
+        <select id="re_style">
+          <option value="">Gris (par défaut)</option>
+          <option value="signature">Orange — signature</option>
+          <option value="carni">Rouge — généreux</option>
+          <option value="crispy">Doré — poulet</option>
+          <option value="veggie">Vert — végétarien</option>
+          <option value="mcdoner">Jaune — burger</option>
+        </select>
+      </div>
+      <div class="fg"><label>Phrase d'accroche</label><textarea id="re_desc" rows="2" placeholder="Notre recette signature, inspirée de nos voyages en Turquie."></textarea></div>
+      <div class="fg"><label>Ingrédients (un par ligne) *</label><textarea id="re_ingredients" rows="6" placeholder="Viande kebab marinée 24h&#10;Légumes de saison&#10;Feta"></textarea></div>
+      <div class="frow">
+        <div class="fg"><label>Allergènes</label><input type="text" id="re_allergenes" placeholder="sésame, arachide"></div>
+        <div class="fg"><label>Supplément (facultatif)</label><input type="text" id="re_supplement" placeholder="Supplément +1€"></div>
+      </div>
+      <div class="fg" style="flex-direction:row;align-items:center;gap:.5rem">
+        <input type="checkbox" id="re_visible" checked style="width:auto">
+        <label for="re_visible" style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--ink)">Visible sur le site</label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeM('overlayRecette')">Annuler</button>
+        <button class="btn btn-primary" id="recetteSaveBtn" onclick="saveRecette()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal AUSSI -->
+  <div class="overlay" id="overlayAussi">
+    <div class="modal" role="dialog">
+      <button class="modal-close" onclick="closeM('overlayAussi')">&times;</button>
+      <h2 id="aussiTitle">Nouvelle spécialité</h2>
+      <div class="fg">
+        <label>Photo</label>
+        <div class="photo-slot__wrap" style="max-width:220px">
+          <input type="file" accept="image/*" onchange="onUpload(this,'aussi')">
+          <div class="photo-slot__empty" id="aussi_photoEmpty">📷<span>Cliquer pour choisir</span></div>
+          <img id="aussi_photoImg" style="display:none" alt="">
+        </div>
+        <p class="photo-slot__hint" id="aussi_photoHint" style="text-align:left">PNG ou JPG.</p>
+      </div>
+      <div class="fg"><label>Nom *</label><input type="text" id="au_nom" placeholder="Ex : Nos Poutines"></div>
+      <div class="fg"><label>Description</label><textarea id="au_desc" rows="3"></textarea></div>
+      <div class="fg">
+        <label>Prix</label>
+        <div class="rows" id="auPrixRows"></div>
+        <div style="margin-top:.5rem"><button class="btn btn-ghost btn-sm" onclick="addAuPrix('','')">+ Ajouter un prix</button></div>
+      </div>
+      <div class="fg" style="flex-direction:row;align-items:center;gap:.5rem">
+        <input type="checkbox" id="au_visible" checked style="width:auto">
+        <label for="au_visible" style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--ink)">Visible sur le site</label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeM('overlayAussi')">Annuler</button>
+        <button class="btn btn-primary" id="aussiSaveBtn" onclick="saveAussi()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="cms.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var FILE = 'data/carte.json';
+    var data = {}, sha = '';
+    var edit = { format: -1, recette: -1, aussi: -1 };
+    var pending = { format: null, aussi: null };
+    function v(id) { return document.getElementById(id).value; }
+    function setv(id, val) { document.getElementById(id).value = val == null ? '' : val; }
+    function chk(id) { return document.getElementById(id).checked; }
+
+    CMS.requireAuth(boot);
+
+    function boot() {
+      var t = new URLSearchParams(location.search).get('tab');
+      if (t) { var btn = document.querySelector('.tab[data-tab="' + t + '"]'); if (btn) switchTab(t, btn); }
+      load();
+    }
+
+    function load() {
+      CMS.status('saving', 'Chargement…');
+      CMS.load(FILE).then(function (r) {
+        data = r.data || {}; sha = r.sha;
+        ['formats', 'recettes', 'formules', 'supplements', 'aussi'].forEach(function (k) { if (!Array.isArray(data[k])) data[k] = []; });
+        CMS.status('', '');
+        renderFormats(); renderRecettes(); renderFormules(); renderAussi();
+      }).catch(function (e) { CMS.status('error', 'Erreur de chargement'); console.error(e); });
+    }
+
+    function persist(msg) {
+      CMS.status('saving', 'Enregistrement…');
+      return CMS.save(FILE, data, sha, msg).then(function (newSha) {
+        sha = newSha; CMS.status('saved', 'Enregistré ✓');
+        setTimeout(function () { CMS.status('', ''); }, 3000);
+      }).catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); throw e; });
+    }
+
+    window.switchTab = function (id, btn) {
+      document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+      document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+      document.getElementById('panel-' + id).classList.add('active');
+      btn.classList.add('active');
+    };
+    window.closeM = function (id) { document.getElementById(id).classList.remove('open'); };
+    function openM(id) { document.getElementById(id).classList.add('open'); }
+
+    function setPhoto(kind, path) {
+      var img = document.getElementById(kind + '_photoImg'), empty = document.getElementById(kind + '_photoEmpty');
+      if (path) { img.src = CMS.imgSrc(path); img.style.display = 'block'; empty.style.display = 'none'; }
+      else { img.style.display = 'none'; empty.style.display = 'flex'; }
+    }
+    window.onUpload = function (input, kind) {
+      if (!input.files || !input.files[0]) return;
+      var hint = document.getElementById(kind + '_photoHint'); hint.textContent = 'Téléversement…';
+      CMS.uploadImage(input.files[0]).then(function (p) { pending[kind] = p; setPhoto(kind, p); hint.textContent = 'Photo prête ✓ — cliquez « Enregistrer ».'; })
+        .catch(function (e) { hint.textContent = 'Erreur de téléversement'; console.error(e); });
+    };
+
+    function actions(list, i, openFn, delFn, moveFn) {
+      return '<div class="item-card__actions">' +
+        '<button class="btn btn-ghost btn-sm" onclick="' + moveFn + '(' + i + ',-1)" ' + (i === 0 ? 'disabled' : '') + ' title="Monter">↑</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="' + moveFn + '(' + i + ',1)" ' + (i === list.length - 1 ? 'disabled' : '') + ' title="Descendre">↓</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="' + openFn + '(' + i + ')" title="Modifier">✏️</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="' + delFn + '(' + i + ')" title="Supprimer">🗑</button></div>';
+    }
+    function swap(arr, i, dir) { var j = i + dir; if (j < 0 || j >= arr.length) return false; var t = arr[i]; arr[i] = arr[j]; arr[j] = t; return true; }
+
+    /* ---------- FORMATS ---------- */
+    function renderFormats() {
+      var el = document.getElementById('formatsList');
+      if (!data.formats.length) { el.innerHTML = '<div class="placeholder">Aucun format.</div>'; return; }
+      el.innerHTML = '';
+      data.formats.forEach(function (f, i) {
+        var d = document.createElement('div'); d.className = 'item-card';
+        d.innerHTML = (f.image ? '<img class="thumb" src="' + CMS.esc(CMS.imgSrc(f.image)) + '" alt="">' : '<div class="no-thumb">🍞</div>') +
+          '<div class="item-card__body"><div class="item-card__title">' + CMS.eh(f.nom) + ' <span style="color:var(--gold-dark)">' + CMS.eh(f.prix || '') + '</span>' +
+          (f.badge ? ' <span class="lang-tag">' + CMS.eh(f.badge) + '</span>' : '') + (f.visible === false ? '<span class="badge-hidden">Masqué</span>' : '') + '</div>' +
+          '<div class="item-card__text">' + CMS.eh(f.desc || '') + '</div></div>' +
+          actions(data.formats, i, 'openFormat', 'delFormat', 'moveFormat');
+        el.appendChild(d);
+      });
+    }
+    window.openFormat = function (i) {
+      edit.format = i; pending.format = null;
+      var f = i === -1 ? {} : data.formats[i];
+      document.getElementById('formatTitle').textContent = i === -1 ? 'Nouveau format' : 'Modifier le format';
+      setv('fo_nom', f.nom); setv('fo_prix', f.prix); setv('fo_badge', f.badge); setv('fo_desc', f.desc);
+      document.getElementById('fo_visible').checked = f.visible !== false;
+      document.getElementById('format_photoHint').textContent = 'PNG ou JPG.';
+      setPhoto('format', f.image || ''); openM('overlayFormat');
+    };
+    window.saveFormat = function () {
+      var nom = v('fo_nom').trim(); if (!nom) { alert('Le nom est obligatoire.'); return; }
+      var btn = document.getElementById('formatSaveBtn'); btn.disabled = true;
+      var f = edit.format === -1 ? {} : data.formats[edit.format];
+      f.nom = nom; f.prix = v('fo_prix').trim(); f.badge = v('fo_badge').trim(); f.desc = v('fo_desc').trim(); f.visible = chk('fo_visible');
+      if (pending.format) f.image = pending.format; if (!f.image) f.image = '';
+      if (!f.id) f.id = 'fo' + Date.now();
+      if (edit.format === -1) data.formats.push(f);
+      persist('Carte — format : ' + nom).then(function () { closeM('overlayFormat'); renderFormats(); }).finally(function () { btn.disabled = false; });
+    };
+    window.delFormat = function (i) { if (!confirm('Supprimer « ' + data.formats[i].nom + ' » ?')) return; var n = data.formats[i].nom; data.formats.splice(i, 1); persist('Carte — suppression format : ' + n).then(renderFormats); };
+    window.moveFormat = function (i, dir) { if (swap(data.formats, i, dir)) { renderFormats(); persist('Carte — ordre des formats'); } };
+
+    /* ---------- RECETTES ---------- */
+    function renderRecettes() {
+      var el = document.getElementById('recettesList');
+      if (!data.recettes.length) { el.innerHTML = '<div class="placeholder">Aucune recette.</div>'; return; }
+      el.innerHTML = '';
+      data.recettes.forEach(function (r, i) {
+        var ings = Array.isArray(r.ingredients) ? r.ingredients.join(', ') : '';
+        var d = document.createElement('div'); d.className = 'item-card';
+        d.innerHTML = '<div class="no-thumb">#' + (i + 1) + '</div>' +
+          '<div class="item-card__body"><div class="item-card__title">' + CMS.eh(r.nom) + (r.badge ? ' <span class="lang-tag">' + CMS.eh(r.badge) + '</span>' : '') + (r.visible === false ? '<span class="badge-hidden">Masquée</span>' : '') + '</div>' +
+          '<div class="item-card__text">' + CMS.eh(ings) + '</div>' +
+          (r.allergenes ? '<div class="item-card__meta">Allergènes : ' + CMS.eh(r.allergenes) + '</div>' : '') + '</div>' +
+          actions(data.recettes, i, 'openRecette', 'delRecette', 'moveRecette');
+        el.appendChild(d);
+      });
+    }
+    window.openRecette = function (i) {
+      edit.recette = i;
+      var r = i === -1 ? {} : data.recettes[i];
+      document.getElementById('recetteTitle').textContent = i === -1 ? 'Nouvelle recette' : 'Modifier la recette';
+      setv('re_nom', r.nom); setv('re_badge', r.badge); setv('re_style', r.style || ''); setv('re_desc', r.desc);
+      setv('re_ingredients', Array.isArray(r.ingredients) ? r.ingredients.join('\n') : '');
+      setv('re_allergenes', r.allergenes); setv('re_supplement', r.supplement);
+      document.getElementById('re_visible').checked = r.visible !== false;
+      openM('overlayRecette');
+    };
+    window.saveRecette = function () {
+      var nom = v('re_nom').trim();
+      var ings = v('re_ingredients').split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+      if (!nom || !ings.length) { alert('Le nom et au moins un ingrédient sont obligatoires.'); return; }
+      var btn = document.getElementById('recetteSaveBtn'); btn.disabled = true;
+      var r = edit.recette === -1 ? {} : data.recettes[edit.recette];
+      r.nom = nom; r.badge = v('re_badge').trim(); r.style = v('re_style'); r.desc = v('re_desc').trim();
+      r.ingredients = ings; r.allergenes = v('re_allergenes').trim(); r.supplement = v('re_supplement').trim(); r.visible = chk('re_visible');
+      if (!r.id) r.id = 're' + Date.now();
+      if (edit.recette === -1) data.recettes.push(r);
+      persist('Carte — recette : ' + nom).then(function () { closeM('overlayRecette'); renderRecettes(); }).finally(function () { btn.disabled = false; });
+    };
+    window.delRecette = function (i) { if (!confirm('Supprimer « ' + data.recettes[i].nom + ' » ?')) return; var n = data.recettes[i].nom; data.recettes.splice(i, 1); persist('Carte — suppression recette : ' + n).then(renderRecettes); };
+    window.moveRecette = function (i, dir) { if (swap(data.recettes, i, dir)) { renderRecettes(); persist('Carte — ordre des recettes'); } };
+
+    /* ---------- FORMULES & SUPPLÉMENTS (édition en ligne) ---------- */
+    function renderFormules() {
+      var rows = document.getElementById('formulesRows'); rows.innerHTML = '';
+      data.formules.forEach(function (f, i) { rows.appendChild(formuleRow(f, i)); });
+      var sr = document.getElementById('supRows'); sr.innerHTML = '';
+      data.supplements.forEach(function (s, i) { sr.appendChild(supRow(s, i)); });
+    }
+    function formuleRow(f, i) {
+      var d = document.createElement('div'); d.className = 'row';
+      d.innerHTML = '<input type="text" placeholder="Nom (ex : Menu Classique)" value="' + CMS.esc(f.nom) + '" data-k="nom">' +
+        '<input type="text" placeholder="Prix" value="' + CMS.esc(f.prix) + '" data-k="prix">' +
+        '<input type="text" placeholder="Composition (ex : Plat + Frites + Boisson)" value="' + CMS.esc(f.detail) + '" data-k="detail">' +
+        '<label class="radio"><input type="radio" name="fm_hl" ' + (f.highlight ? 'checked' : '') + '> Mis en avant</label>' +
+        '<button class="btn btn-danger btn-sm" title="Supprimer" onclick="this.parentNode.remove()">🗑</button>';
+      return d;
+    }
+    function supRow(s) {
+      var d = document.createElement('div'); d.className = 'row row--2';
+      d.innerHTML = '<input type="text" placeholder="Libellé (ex : Sup. Légumes)" value="' + CMS.esc(s.label) + '" data-k="label">' +
+        '<input type="text" placeholder="Prix (ex : +0,50€)" value="' + CMS.esc(s.prix) + '" data-k="prix">' +
+        '<button class="btn btn-danger btn-sm" title="Supprimer" onclick="this.parentNode.remove()">🗑</button>';
+      return d;
+    }
+    window.addFormule = function () { document.getElementById('formulesRows').appendChild(formuleRow({ nom: '', prix: '', detail: '', highlight: false })); };
+    window.addSup = function () { document.getElementById('supRows').appendChild(supRow({ label: '', prix: '' })); };
+    window.saveFormules = function () {
+      var btn = document.getElementById('saveFormulesBtn'); btn.disabled = true;
+      var fm = [], ids = data.formules.map(function (f) { return f.id; });
+      document.querySelectorAll('#formulesRows .row').forEach(function (row, i) {
+        var g = function (k) { return row.querySelector('[data-k="' + k + '"]').value.trim(); };
+        if (!g('nom')) return;
+        fm.push({ id: ids[i] || ('fm' + Date.now() + i), nom: g('nom'), prix: g('prix'), detail: g('detail'), highlight: row.querySelector('input[type=radio]').checked });
+      });
+      var sups = [];
+      document.querySelectorAll('#supRows .row').forEach(function (row) {
+        var g = function (k) { return row.querySelector('[data-k="' + k + '"]').value.trim(); };
+        if (!g('label')) return;
+        sups.push({ label: g('label'), prix: g('prix') });
+      });
+      data.formules = fm; data.supplements = sups;
+      persist('Carte — menus & suppléments').then(renderFormules).finally(function () { btn.disabled = false; });
+    };
+
+    /* ---------- AUSSI (poutines, mezzés) ---------- */
+    function renderAussi() {
+      var el = document.getElementById('aussiList');
+      if (!data.aussi.length) { el.innerHTML = '<div class="placeholder">Aucune spécialité.</div>'; return; }
+      el.innerHTML = '';
+      data.aussi.forEach(function (a, i) {
+        var prix = (a.prix || []).map(function (p) { return p.label + ' ' + p.prix; }).join(' · ');
+        var d = document.createElement('div'); d.className = 'item-card';
+        d.innerHTML = (a.image ? '<img class="thumb" src="' + CMS.esc(CMS.imgSrc(a.image)) + '" alt="">' : '<div class="no-thumb">🧀</div>') +
+          '<div class="item-card__body"><div class="item-card__title">' + CMS.eh(a.nom) + (a.visible === false ? '<span class="badge-hidden">Masqué</span>' : '') + '</div>' +
+          '<div class="item-card__text">' + CMS.eh(a.desc || '') + '</div><div class="item-card__meta">' + CMS.eh(prix) + '</div></div>' +
+          actions(data.aussi, i, 'openAussi', 'delAussi', 'moveAussi');
+        el.appendChild(d);
+      });
+    }
+    window.addAuPrix = function (label, prix) {
+      var d = document.createElement('div'); d.className = 'row row--2';
+      d.innerHTML = '<input type="text" placeholder="Taille (ex : Classique)" value="' + CMS.esc(label) + '" data-k="label">' +
+        '<input type="text" placeholder="Prix (ex : 6,50€)" value="' + CMS.esc(prix) + '" data-k="prix">' +
+        '<button class="btn btn-danger btn-sm" title="Supprimer" onclick="this.parentNode.remove()">🗑</button>';
+      document.getElementById('auPrixRows').appendChild(d);
+    };
+    window.openAussi = function (i) {
+      edit.aussi = i; pending.aussi = null;
+      var a = i === -1 ? {} : data.aussi[i];
+      document.getElementById('aussiTitle').textContent = i === -1 ? 'Nouvelle spécialité' : 'Modifier la spécialité';
+      setv('au_nom', a.nom); setv('au_desc', a.desc);
+      document.getElementById('au_visible').checked = a.visible !== false;
+      document.getElementById('auPrixRows').innerHTML = '';
+      (a.prix && a.prix.length ? a.prix : [{ label: '', prix: '' }]).forEach(function (p) { addAuPrix(p.label, p.prix); });
+      document.getElementById('aussi_photoHint').textContent = 'PNG ou JPG.';
+      setPhoto('aussi', a.image || ''); openM('overlayAussi');
+    };
+    window.saveAussi = function () {
+      var nom = v('au_nom').trim(); if (!nom) { alert('Le nom est obligatoire.'); return; }
+      var btn = document.getElementById('aussiSaveBtn'); btn.disabled = true;
+      var a = edit.aussi === -1 ? {} : data.aussi[edit.aussi];
+      a.nom = nom; a.desc = v('au_desc').trim(); a.visible = chk('au_visible');
+      a.prix = [];
+      document.querySelectorAll('#auPrixRows .row').forEach(function (row) {
+        var l = row.querySelector('[data-k="label"]').value.trim(), p = row.querySelector('[data-k="prix"]').value.trim();
+        if (l || p) a.prix.push({ label: l, prix: p });
+      });
+      if (pending.aussi) a.image = pending.aussi; if (!a.image) a.image = '';
+      if (!a.id) a.id = 'au' + Date.now();
+      if (edit.aussi === -1) data.aussi.push(a);
+      persist('Carte — spécialité : ' + nom).then(function () { closeM('overlayAussi'); renderAussi(); }).finally(function () { btn.disabled = false; });
+    };
+    window.delAussi = function (i) { if (!confirm('Supprimer « ' + data.aussi[i].nom + ' » ?')) return; var n = data.aussi[i].nom; data.aussi.splice(i, 1); persist('Carte — suppression : ' + n).then(renderAussi); };
+    window.moveAussi = function (i, dir) { if (swap(data.aussi, i, dir)) { renderAussi(); persist('Carte — ordre des spécialités'); } };
+
+    document.querySelectorAll('.overlay').forEach(function (o) { o.addEventListener('click', function (e) { if (e.target === o) o.classList.remove('open'); }); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(function (o) { o.classList.remove('open'); }); });
+  })();
+  </script>
+</body>
+</html>

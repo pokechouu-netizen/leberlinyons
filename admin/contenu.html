@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Contenu du site — Admin Le Berli'Nyons</title>
+  <link rel="icon" href="../assets/logo-hd.jpg">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <style>
+    .photo-slot__wrap.contain img { object-fit: contain; background: #1a1a1a; }
+    .range-row { display: flex; align-items: center; gap: .75rem; }
+    .range-row input[type=range] { flex: 1; }
+    .range-row output { font-size: .8rem; color: var(--muted); min-width: 3ch; }
+    .photos-section-title { font-size: .95rem; font-weight: 700; margin: 2rem 0 .5rem; display: flex; align-items: center; gap: .4rem; }
+    .photos-section-title:first-child { margin-top: 0; }
+  </style>
+</head>
+<body>
+
+  <div id="loginScreen">
+    <div class="brand">Le Berli'Nyons</div>
+    <h1>Contenu du site</h1>
+    <p>Connectez-vous pour modifier les textes, photos, avis, parcours et artistes.</p>
+    <button class="btn-login" onclick="CMS.login()">Se connecter</button>
+  </div>
+
+  <div id="adminScreen">
+    <div class="topbar">
+      <h1>✏️ Contenu du site</h1>
+      <span class="status" id="statusEl"></span>
+      <a href="index.html" class="btn btn-ghost btn-sm">← Admin</a>
+      <a href="../index.html" target="_blank" class="btn btn-ghost btn-sm">Voir le site ↗</a>
+      <button class="btn-text" onclick="CMS.logout()">Déconnexion</button>
+    </div>
+
+    <div class="tabs-wrap">
+      <div class="tabs">
+        <button class="tab active" data-tab="textes" onclick="switchTab('textes',this)">✏️ Textes</button>
+        <button class="tab" data-tab="photos" onclick="switchTab('photos',this)">📷 Photos</button>
+        <button class="tab" data-tab="avis" onclick="switchTab('avis',this)">⭐ Avis</button>
+        <button class="tab" data-tab="parcours" onclick="switchTab('parcours',this)">🗺️ Parcours</button>
+        <button class="tab" data-tab="artistes" onclick="switchTab('artistes',this)">🎵 Artistes</button>
+      </div>
+    </div>
+
+    <!-- TEXTES -->
+    <div class="panel active" id="panel-textes">
+      <div class="panel-header"><h2>Textes du site</h2></div>
+      <p class="panel-hint">Modifiez les textes section par section, puis cliquez « Enregistrer les textes » en bas. Un retour à la ligne (touche Entrée) crée un saut de ligne sur le site.</p>
+      <div id="textesContainer"></div>
+      <div class="form-save-row">
+        <button class="btn btn-primary" id="saveTextesBtn" onclick="saveTextes()">Enregistrer les textes</button>
+      </div>
+    </div>
+
+    <!-- PHOTOS -->
+    <div class="panel" id="panel-photos">
+      <div class="panel-header"><h2>Toutes les photos du site</h2></div>
+      <p class="panel-hint">Cliquez sur une photo pour la remplacer : le changement est enregistré immédiatement. Pour ajouter / supprimer une photo de la galerie, allez dans <a href="creations.html"><strong>Galerie photos</strong> →</a> ; pour les plats, dans <a href="carte.html"><strong>La carte</strong> →</a>.</p>
+      <div id="photosContainer"><div class="loading">Chargement…</div></div>
+    </div>
+
+    <!-- AVIS -->
+    <div class="panel" id="panel-avis">
+      <div class="panel-header">
+        <h2>Avis clients</h2>
+        <button class="btn btn-primary btn-sm" onclick="openAvis(-1)">+ Ajouter un avis</button>
+      </div>
+      <p class="panel-hint">Ces avis s'affichent dans la section « Ce qu'en disent nos clients ».</p>
+      <div class="card-list" id="avisList"><div class="loading">Chargement…</div></div>
+    </div>
+
+    <!-- PARCOURS -->
+    <div class="panel" id="panel-parcours">
+      <div class="panel-header">
+        <h2>Notre parcours</h2>
+        <button class="btn btn-primary btn-sm" onclick="openParcours(-1)">+ Ajouter une étape</button>
+      </div>
+      <p class="panel-hint">Les étapes de l'histoire du Berli', dans l'ordre chronologique (utilisez les flèches). Le titre et l'intro de la section se règlent dans l'onglet <a href="#" onclick="switchTab('textes',document.querySelector('.tab[data-tab=textes]'));return false;">Textes</a>.</p>
+      <div class="card-list" id="parcoursList"><div class="loading">Chargement…</div></div>
+    </div>
+
+    <!-- ARTISTES -->
+    <div class="panel" id="panel-artistes">
+      <div class="panel-header">
+        <h2>Artistes &amp; amis</h2>
+        <button class="btn btn-primary btn-sm" onclick="openArtiste(-1)">+ Ajouter</button>
+      </div>
+      <p class="panel-hint">Les cartes de la section « Artistes qu'on aime » : artistes, webradio, producteurs, partenaires…</p>
+      <div class="card-list" id="artistesList"><div class="loading">Chargement…</div></div>
+    </div>
+  </div>
+
+  <!-- Modal AVIS -->
+  <div class="overlay" id="overlayAvis">
+    <div class="modal" role="dialog">
+      <button class="modal-close" onclick="closeM('overlayAvis')">&times;</button>
+      <h2 id="avisTitle">Nouvel avis</h2>
+      <div class="fg"><label>Texte de l'avis *</label><textarea id="a_texte" rows="5" placeholder="Le texte de l'avis"></textarea></div>
+      <div class="frow">
+        <div class="fg"><label>Auteur *</label><input type="text" id="a_auteur" placeholder="Ex : Madeleine V."></div>
+        <div class="fg"><label>Note</label>
+          <select id="a_note">
+            <option value="5">★★★★★ (5)</option>
+            <option value="4">★★★★ (4)</option>
+            <option value="3">★★★ (3)</option>
+            <option value="2">★★ (2)</option>
+            <option value="1">★ (1)</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Source</label><input type="text" id="a_source" placeholder="Avis Google"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeM('overlayAvis')">Annuler</button>
+        <button class="btn btn-primary" id="avisSaveBtn" onclick="saveAvis()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal PARCOURS -->
+  <div class="overlay" id="overlayParcours">
+    <div class="modal" role="dialog">
+      <button class="modal-close" onclick="closeM('overlayParcours')">&times;</button>
+      <h2 id="parcoursTitle">Nouvelle étape</h2>
+      <div class="frow">
+        <div class="fg"><label>Date / période *</label><input type="text" id="p_date" placeholder="Ex : Été 2025"></div>
+        <div class="fg"><label>Titre *</label><input type="text" id="p_titre" placeholder="Ex : Ouverture du Berli'Nyons"></div>
+      </div>
+      <div class="fg"><label>Texte</label><textarea id="p_texte" rows="4"></textarea></div>
+      <div class="fg">
+        <label>Photo (facultatif)</label>
+        <div class="photo-slot__wrap" style="max-width:240px">
+          <input type="file" accept="image/*" onchange="onUpload(this,'parcours')">
+          <div class="photo-slot__empty" id="parcours_photoEmpty">📷<span>Cliquer pour choisir</span></div>
+          <img id="parcours_photoImg" style="display:none" alt="">
+        </div>
+        <p class="photo-slot__hint" id="parcours_photoHint" style="text-align:left">JPG ou PNG. <a href="#" onclick="removePhoto('parcours');return false;">Retirer la photo</a></p>
+      </div>
+      <div class="fg">
+        <label>Cadrage vertical de la photo</label>
+        <div class="range-row"><span class="hint">Haut</span><input type="range" id="p_cadrage" min="0" max="100" value="50" oninput="document.getElementById('p_cadrage_out').value=this.value+'%'"><span class="hint">Bas</span><output id="p_cadrage_out">50%</output></div>
+        <span class="hint">Choisit quelle partie de la photo reste visible (ex : les visages en haut).</span>
+      </div>
+      <div class="fg" style="flex-direction:row;align-items:center;gap:.5rem">
+        <input type="checkbox" id="p_visible" checked style="width:auto">
+        <label for="p_visible" style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--ink)">Visible sur le site</label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeM('overlayParcours')">Annuler</button>
+        <button class="btn btn-primary" id="parcoursSaveBtn" onclick="saveParcours()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal ARTISTE -->
+  <div class="overlay" id="overlayArtiste">
+    <div class="modal" role="dialog">
+      <button class="modal-close" onclick="closeM('overlayArtiste')">&times;</button>
+      <h2 id="artisteTitle">Nouvelle carte</h2>
+      <div class="fg"><label>Nom *</label><input type="text" id="ar_nom" placeholder="Ex : Radio Krimi"></div>
+      <div class="fg"><label>Description</label><textarea id="ar_desc" rows="3"></textarea></div>
+      <div class="fg">
+        <label>Image</label>
+        <div class="photo-slot__wrap" style="max-width:240px" id="ar_photoWrap">
+          <input type="file" accept="image/*" onchange="onUpload(this,'artiste')">
+          <div class="photo-slot__empty" id="artiste_photoEmpty">📷<span>Cliquer pour choisir</span></div>
+          <img id="artiste_photoImg" style="display:none" alt="">
+        </div>
+        <p class="photo-slot__hint" id="artiste_photoHint" style="text-align:left">JPG ou PNG.</p>
+      </div>
+      <div class="fg" style="flex-direction:row;align-items:center;gap:.5rem">
+        <input type="checkbox" id="ar_logo" style="width:auto" onchange="document.getElementById('ar_photoWrap').classList.toggle('contain',this.checked)">
+        <label for="ar_logo" style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--ink)">C'est un logo (affiché en entier, sans recadrage)</label>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Étiquette sur la photo</label><input type="text" id="ar_categorie" placeholder="Ex : Webradio, Artiste"><span class="hint">Uniquement pour les photos (pas les logos).</span></div>
+        <div class="fg"><label>Texte du bouton</label><input type="text" id="ar_bouton" placeholder="Ex : Écouter"><span class="hint">Vide = toute la carte est cliquable.</span></div>
+      </div>
+      <div class="fg"><label>Lien (site, YouTube, Instagram…)</label><input type="text" id="ar_url" placeholder="https://…"></div>
+      <div class="fg" style="flex-direction:row;align-items:center;gap:.5rem">
+        <input type="checkbox" id="ar_visible" checked style="width:auto">
+        <label for="ar_visible" style="text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--ink)">Visible sur le site</label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeM('overlayArtiste')">Annuler</button>
+        <button class="btn btn-primary" id="artisteSaveBtn" onclick="saveArtiste()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="cms.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var FILE = 'data/contenu.json', CARTE_FILE = 'data/carte.json', GAL_FILE = 'data/creations.json';
+    var data = {}, sha = '';
+    var carte = null, carteSha = '';
+    var gal = null, galSha = '';
+    var edit = { avis: -1, parcours: -1, artiste: -1 };
+    var pending = { parcours: null, artiste: null };
+    var removed = { parcours: false };
+    function v(id) { return document.getElementById(id).value; }
+    function setv(id, val) { document.getElementById(id).value = val == null ? '' : val; }
+    function chk(id) { return document.getElementById(id).checked; }
+
+    /* ---- Textes : groupes & libellés ---- */
+    var TEXT_GROUPS = [
+      { title: '🏠 Accueil (haut de page)', keys: ['hero_badge', 'hero_title', 'hero_title_accent', 'hero_sub', 'hero_stat_clients', 'hero_stat_annees', 'hero_note_google', 'hero_horaires_resume', 'hero_image_badge'] },
+      { title: '🥙 La carte', keys: ['menu_title', 'menu_sub', 'menu_prix_base', 'recettes_sub'] },
+      { title: '🧀 « Le Berli\', c\'est aussi… »', keys: ['aussi_title', 'aussi_sub'] },
+      { title: '🗺️ Notre parcours', keys: ['parcours_title', 'parcours_intro'] },
+      { title: '🎵 Artistes', keys: ['artistes_title', 'artistes_sub'] },
+      { title: '🖼️ Galerie', keys: ['galerie_title', 'galerie_sub'] },
+      { title: '⭐ Avis', keys: ['avis_title'] },
+      { title: '🚚 Services', keys: ['services_title', 'services_sub', 'service1_title', 'service1_desc', 'service1_bouton', 'service2_title', 'service2_desc', 'service2_bouton'] },
+      { title: '👥 Communauté', keys: ['communaute_title', 'communaute_sub'] },
+      { title: '📍 Contact', keys: ['contact_title'] }
+    ];
+    var LABELS = {
+      hero_badge: 'Petit texte au-dessus du titre', hero_title: 'Grand titre — début', hero_title_accent: 'Grand titre — fin (en orange)', hero_sub: 'Sous-titre',
+      hero_stat_clients: 'Chiffre « clients satisfaits »', hero_stat_annees: 'Chiffre « ans d\'expérience »', hero_note_google: 'Note Google (ex : 4.9)',
+      hero_horaires_resume: 'Horaires en résumé', hero_image_badge: 'Badge sur la photo',
+      menu_title: 'Titre', menu_sub: 'Sous-titre', menu_prix_base: 'Prix de départ (« Tout commence à … seul »)', recettes_sub: 'Phrase sous « Choisis ta recette »',
+      aussi_title: 'Titre', aussi_sub: 'Sous-titre',
+      parcours_title: 'Titre', parcours_intro: 'Texte d\'introduction (un paragraphe par ligne)',
+      artistes_title: 'Titre', artistes_sub: 'Sous-titre',
+      galerie_title: 'Titre', galerie_sub: 'Sous-titre',
+      avis_title: 'Titre',
+      services_title: 'Titre', services_sub: 'Sous-titre',
+      service1_title: 'Service 1 — titre', service1_desc: 'Service 1 — description', service1_bouton: 'Service 1 — texte du bouton',
+      service2_title: 'Service 2 — titre', service2_desc: 'Service 2 — description', service2_bouton: 'Service 2 — texte du bouton',
+      communaute_title: 'Titre', communaute_sub: 'Sous-titre',
+      contact_title: 'Titre'
+    };
+    function isLong(k) { return /(_desc|_sub|_intro)$/.test(k); }
+
+    var PHOTOS = {
+      logo: 'Logo (en-tête, favicon)',
+      logo_flottant: 'Logo flottant en fond de page',
+      hero_fond: 'Image de fond de l\'accueil',
+      hero_photo: 'Photo principale de l\'accueil',
+      hero_broche: 'Broche décorative (accueil)'
+    };
+
+    CMS.requireAuth(boot);
+
+    function boot() {
+      var t = new URLSearchParams(location.search).get('tab');
+      if (t) { var btn = document.querySelector('.tab[data-tab="' + t + '"]'); if (btn) switchTab(t, btn); }
+      load();
+    }
+
+    function load() {
+      CMS.status('saving', 'Chargement…');
+      CMS.load(FILE).then(function (r) {
+        data = r.data || {}; sha = r.sha;
+        data.textes = data.textes || {}; data.photos = data.photos || {};
+        ['avis', 'parcours', 'artistes'].forEach(function (k) { if (!Array.isArray(data[k])) data[k] = []; });
+        CMS.status('', '');
+        renderTextes(); renderAvis(); renderParcours(); renderArtistes(); renderPhotos();
+      }).catch(function (e) { CMS.status('error', 'Erreur de chargement'); console.error(e); });
+      CMS.load(CARTE_FILE).then(function (r) { carte = r.data || {}; carteSha = r.sha; renderPhotos(); }).catch(function (e) { console.error(e); });
+      CMS.load(GAL_FILE).then(function (r) { gal = r.data || {}; galSha = r.sha; renderPhotos(); }).catch(function (e) { console.error(e); });
+    }
+
+    function persist(msg) {
+      CMS.status('saving', 'Enregistrement…');
+      return CMS.save(FILE, data, sha, msg).then(function (newSha) {
+        sha = newSha; CMS.status('saved', 'Enregistré ✓');
+        setTimeout(function () { CMS.status('', ''); }, 3000);
+      }).catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); throw e; });
+    }
+
+    window.switchTab = function (id, btn) {
+      document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+      document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+      document.getElementById('panel-' + id).classList.add('active');
+      btn.classList.add('active');
+    };
+    window.closeM = function (id) { document.getElementById(id).classList.remove('open'); };
+    function openM(id) { document.getElementById(id).classList.add('open'); }
+
+    function setPhoto(kind, path) {
+      var img = document.getElementById(kind + '_photoImg'), empty = document.getElementById(kind + '_photoEmpty');
+      if (path) { img.src = CMS.imgSrc(path); img.style.display = 'block'; empty.style.display = 'none'; }
+      else { img.style.display = 'none'; empty.style.display = 'flex'; }
+    }
+    window.onUpload = function (input, kind) {
+      if (!input.files || !input.files[0]) return;
+      var hint = document.getElementById(kind + '_photoHint'); hint.textContent = 'Téléversement…';
+      CMS.uploadImage(input.files[0]).then(function (p) { pending[kind] = p; removed[kind] = false; setPhoto(kind, p); hint.textContent = 'Photo prête ✓ — cliquez « Enregistrer ».'; })
+        .catch(function (e) { hint.textContent = 'Erreur de téléversement'; console.error(e); });
+    };
+    window.removePhoto = function (kind) { pending[kind] = null; removed[kind] = true; setPhoto(kind, ''); };
+
+    function actions(list, i, openFn, delFn, moveFn) {
+      return '<div class="item-card__actions">' +
+        (moveFn ? '<button class="btn btn-ghost btn-sm" onclick="' + moveFn + '(' + i + ',-1)" ' + (i === 0 ? 'disabled' : '') + ' title="Monter">↑</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="' + moveFn + '(' + i + ',1)" ' + (i === list.length - 1 ? 'disabled' : '') + ' title="Descendre">↓</button>' : '') +
+        '<button class="btn btn-ghost btn-sm" onclick="' + openFn + '(' + i + ')" title="Modifier">✏️</button>' +
+        '<button class="btn btn-danger btn-sm" onclick="' + delFn + '(' + i + ')" title="Supprimer">🗑</button></div>';
+    }
+    function swap(arr, i, dir) { var j = i + dir; if (j < 0 || j >= arr.length) return false; var t = arr[i]; arr[i] = arr[j]; arr[j] = t; return true; }
+
+    /* ---------- TEXTES ---------- */
+    function renderTextes() {
+      var c = document.getElementById('textesContainer'); c.innerHTML = '';
+      TEXT_GROUPS.forEach(function (g) {
+        var card = document.createElement('div'); card.className = 'section-card';
+        var html = '<p class="section-card__title">' + g.title + '</p>';
+        g.keys.forEach(function (k) {
+          var val = data.textes[k] == null ? '' : data.textes[k];
+          html += '<div class="fg"><label>' + CMS.eh(LABELS[k] || k) + '</label>' +
+            (isLong(k) ? '<textarea id="tx_' + k + '" rows="3">' + CMS.eh(val) + '</textarea>' : '<input type="text" id="tx_' + k + '" value="' + CMS.esc(val) + '">') +
+            '</div>';
+        });
+        card.innerHTML = html; c.appendChild(card);
+      });
+    }
+    window.saveTextes = function () {
+      var btn = document.getElementById('saveTextesBtn'); btn.disabled = true;
+      TEXT_GROUPS.forEach(function (g) { g.keys.forEach(function (k) { data.textes[k] = document.getElementById('tx_' + k).value; }); });
+      persist('Mise à jour des textes du site').finally(function () { btn.disabled = false; });
+    };
+
+    /* ---------- PHOTOS (toutes au même endroit) ---------- */
+    function slot(label, src, onchangeAttr, contain) {
+      return '<div class="photo-slot"><span class="photo-slot__label">' + CMS.eh(label) + '</span>' +
+        '<div class="photo-slot__wrap' + (contain ? ' contain' : '') + '"><input type="file" accept="image/*" onchange="' + onchangeAttr + '">' +
+        (src ? '<img src="' + CMS.esc(CMS.imgSrc(src)) + '" alt="">' : '<div class="photo-slot__empty">📷<span>Cliquer pour ajouter</span></div>') +
+        '</div><p class="photo-slot__hint">Cliquer pour remplacer</p></div>';
+    }
+    function renderPhotos() {
+      var c = document.getElementById('photosContainer'); if (!data.photos) return;
+      var html = '<p class="photos-section-title">🏠 Photos clés</p><div class="photos-grid">';
+      Object.keys(PHOTOS).forEach(function (k) { html += slot(PHOTOS[k], data.photos[k] || '', 'replaceKey(this,\'' + k + '\')', /logo/.test(k)); });
+      html += '</div>';
+      if (carte) {
+        html += '<p class="photos-section-title">🍞 Formats</p><div class="photos-grid">';
+        (carte.formats || []).forEach(function (f, i) { html += slot(f.nom || ('Format ' + (i + 1)), f.image, 'replaceCarte(this,\'formats\',' + i + ')', true); });
+        html += '</div><p class="photos-section-title">🧀 Poutines &amp; mezzés</p><div class="photos-grid">';
+        (carte.aussi || []).forEach(function (a, i) { html += slot(a.nom || ('Spécialité ' + (i + 1)), a.image, 'replaceCarte(this,\'aussi\',' + i + ')'); });
+        html += '</div>';
+      }
+      html += '<p class="photos-section-title">🗺️ Parcours</p><div class="photos-grid">';
+      (data.parcours || []).forEach(function (p, i) { html += slot((p.date ? p.date + ' — ' : '') + (p.titre || ''), p.image, 'replaceList(this,\'parcours\',' + i + ')'); });
+      html += '</div><p class="photos-section-title">🎵 Artistes &amp; amis</p><div class="photos-grid">';
+      (data.artistes || []).forEach(function (a, i) { html += slot(a.nom || ('Carte ' + (i + 1)), a.image, 'replaceList(this,\'artistes\',' + i + ')', !!a.logo); });
+      html += '</div>';
+      if (gal) {
+        html += '<p class="photos-section-title">🖼️ Galerie (bandeau défilant)</p><div class="photos-grid">';
+        (gal.creations || []).forEach(function (g, i) { html += slot('Photo ' + (i + 1), g.image, 'replaceGal(this,' + i + ')'); });
+        html += '</div>';
+      }
+      c.innerHTML = html;
+    }
+    function upload(input) {
+      if (!input.files || !input.files[0]) return null;
+      CMS.status('saving', 'Téléversement…');
+      return CMS.uploadImage(input.files[0]);
+    }
+    window.replaceKey = function (input, key) {
+      var up = upload(input); if (!up) return;
+      up.then(function (path) { data.photos[key] = path; return persist('Photo : ' + (PHOTOS[key] || key)); }).then(renderPhotos)
+        .catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
+    };
+    window.replaceList = function (input, list, i) {
+      var up = upload(input); if (!up) return;
+      up.then(function (path) { data[list][i].image = path; return persist('Photo ' + list + ' : ' + (data[list][i].nom || data[list][i].titre || i)); }).then(renderPhotos)
+        .catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
+    };
+    window.replaceCarte = function (input, list, i) {
+      var up = upload(input); if (!up) return;
+      up.then(function (path) {
+        carte[list][i].image = path; CMS.status('saving', 'Enregistrement…');
+        return CMS.save(CARTE_FILE, carte, carteSha, 'Photo carte : ' + (carte[list][i].nom || i));
+      }).then(function (ns) { carteSha = ns; CMS.status('saved', 'Enregistré ✓'); setTimeout(function () { CMS.status('', ''); }, 3000); renderPhotos(); })
+        .catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
+    };
+    window.replaceGal = function (input, i) {
+      var up = upload(input); if (!up) return;
+      up.then(function (path) {
+        gal.creations[i].image = path; CMS.status('saving', 'Enregistrement…');
+        return CMS.save(GAL_FILE, gal, galSha, 'Photo galerie #' + (i + 1));
+      }).then(function (ns) { galSha = ns; CMS.status('saved', 'Enregistré ✓'); setTimeout(function () { CMS.status('', ''); }, 3000); renderPhotos(); })
+        .catch(function (e) { CMS.status('error', 'Erreur'); console.error(e); });
+    };
+
+    /* ---------- AVIS ---------- */
+    function renderAvis() {
+      var el = document.getElementById('avisList');
+      if (!data.avis.length) { el.innerHTML = '<div class="placeholder">Aucun avis. Cliquez « + Ajouter un avis ».</div>'; return; }
+      el.innerHTML = '';
+      data.avis.forEach(function (av, i) {
+        var stars = '★'.repeat(Math.max(1, Math.min(5, parseInt(av.note) || 5)));
+        var d = document.createElement('div'); d.className = 'item-card';
+        d.innerHTML = '<div class="item-card__body">' +
+            '<div class="item-card__text" style="font-style:italic">"' + CMS.eh(av.texte) + '"</div>' +
+            '<div class="item-card__meta">— ' + CMS.eh(av.auteur) + ' · <span style="color:var(--gold-dark)">' + stars + '</span>' + (av.source ? ' · ' + CMS.eh(av.source) : '') + '</div>' +
+          '</div>' + actions(data.avis, i, 'openAvis', 'delAvis', 'moveAvis');
+        el.appendChild(d);
+      });
+    }
+    window.openAvis = function (i) {
+      edit.avis = i;
+      var av = i === -1 ? {} : data.avis[i];
+      document.getElementById('avisTitle').textContent = i === -1 ? 'Nouvel avis' : 'Modifier l\'avis';
+      setv('a_texte', av.texte); setv('a_auteur', av.auteur); setv('a_note', String(av.note || 5)); setv('a_source', av.source == null ? 'Avis Google' : av.source);
+      openM('overlayAvis'); document.getElementById('a_texte').focus();
+    };
+    window.saveAvis = function () {
+      var t = v('a_texte').trim(), aut = v('a_auteur').trim();
+      if (!t || !aut) { alert('Le texte et l\'auteur sont obligatoires.'); return; }
+      var btn = document.getElementById('avisSaveBtn'); btn.disabled = true;
+      var av = edit.avis === -1 ? {} : data.avis[edit.avis];
+      av.texte = t; av.auteur = aut; av.note = parseInt(v('a_note')) || 5; av.source = v('a_source').trim();
+      if (!av.id) av.id = 'av' + Date.now();
+      if (edit.avis === -1) data.avis.push(av);
+      persist((edit.avis === -1 ? 'Ajout avis : ' : 'Modif avis : ') + aut).then(function () { closeM('overlayAvis'); renderAvis(); }).finally(function () { btn.disabled = false; });
+    };
+    window.delAvis = function (i) { if (!confirm('Supprimer cet avis ?')) return; var a = data.avis[i].auteur; data.avis.splice(i, 1); persist('Suppression avis : ' + a).then(renderAvis); };
+    window.moveAvis = function (i, dir) { if (swap(data.avis, i, dir)) { renderAvis(); persist('Ordre des avis'); } };
+
+    /* ---------- PARCOURS ---------- */
+    function renderParcours() {
+      var el = document.getElementById('parcoursList');
+      if (!data.parcours.length) { el.innerHTML = '<div class="placeholder">Aucune étape.</div>'; return; }
+      el.innerHTML = '';
+      data.parcours.forEach(function (p, i) {
+        var d = document.createElement('div'); d.className = 'item-card';
+        d.innerHTML = (p.image ? '<img class="thumb" src="' + CMS.esc(CMS.imgSrc(p.image)) + '" alt="">' : '<div class="no-thumb">📅</div>') +
+          '<div class="item-card__body"><div class="item-card__title"><span style="color:var(--gold-dark)">' + CMS.eh(p.date) + '</span> — ' + CMS.eh(p.titre) + (p.visible === false ? '<span class="badge-hidden">Masquée</span>' : '') + '</div>' +
+          '<div class="item-card__text">' + CMS.eh(p.texte || '') + '</div></div>' +
+          actions(data.parcours, i, 'openParcours', 'delParcours', 'moveParcours');
+        el.appendChild(d);
+      });
+    }
+    window.openParcours = function (i) {
+      edit.parcours = i; pending.parcours = null; removed.parcours = false;
+      var p = i === -1 ? {} : data.parcours[i];
+      document.getElementById('parcoursTitle').textContent = i === -1 ? 'Nouvelle étape' : 'Modifier l\'étape';
+      setv('p_date', p.date); setv('p_titre', p.titre); setv('p_texte', p.texte);
+      var cad = p.cadrage == null ? 50 : p.cadrage; setv('p_cadrage', cad); document.getElementById('p_cadrage_out').value = cad + '%';
+      document.getElementById('p_visible').checked = p.visible !== false;
+      document.getElementById('parcours_photoHint').innerHTML = 'JPG ou PNG. <a href="#" onclick="removePhoto(\'parcours\');return false;">Retirer la photo</a>';
+      setPhoto('parcours', p.image || ''); openM('overlayParcours');
+    };
+    window.saveParcours = function () {
+      var date = v('p_date').trim(), titre = v('p_titre').trim();
+      if (!date || !titre) { alert('La date et le titre sont obligatoires.'); return; }
+      var btn = document.getElementById('parcoursSaveBtn'); btn.disabled = true;
+      var p = edit.parcours === -1 ? {} : data.parcours[edit.parcours];
+      p.date = date; p.titre = titre; p.texte = v('p_texte').trim(); p.cadrage = parseInt(v('p_cadrage')) || 50; p.visible = chk('p_visible');
+      if (pending.parcours) p.image = pending.parcours; else if (removed.parcours) p.image = ''; if (p.image == null) p.image = '';
+      if (!p.id) p.id = 'pa' + Date.now();
+      if (edit.parcours === -1) data.parcours.push(p);
+      persist('Parcours : ' + titre).then(function () { closeM('overlayParcours'); renderParcours(); renderPhotos(); }).finally(function () { btn.disabled = false; });
+    };
+    window.delParcours = function (i) { if (!confirm('Supprimer « ' + data.parcours[i].titre + ' » ?')) return; var t = data.parcours[i].titre; data.parcours.splice(i, 1); persist('Suppression étape : ' + t).then(function () { renderParcours(); renderPhotos(); }); };
+    window.moveParcours = function (i, dir) { if (swap(data.parcours, i, dir)) { renderParcours(); persist('Ordre du parcours'); } };
+
+    /* ---------- ARTISTES ---------- */
+    function renderArtistes() {
+      var el = document.getElementById('artistesList');
+      if (!data.artistes.length) { el.innerHTML = '<div class="placeholder">Aucune carte.</div>'; return; }
+      el.innerHTML = '';
+      data.artistes.forEach(function (a, i) {
+        var d = document.createElement('div'); d.className = 'item-card';
+        d.innerHTML = (a.image ? '<img class="thumb" style="' + (a.logo ? 'object-fit:contain;background:#1a1a1a' : '') + '" src="' + CMS.esc(CMS.imgSrc(a.image)) + '" alt="">' : '<div class="no-thumb">🎵</div>') +
+          '<div class="item-card__body"><div class="item-card__title">' + CMS.eh(a.nom) + (a.categorie ? ' <span class="lang-tag">' + CMS.eh(a.categorie) + '</span>' : '') + (a.visible === false ? '<span class="badge-hidden">Masquée</span>' : '') + '</div>' +
+          '<div class="item-card__text">' + CMS.eh(a.desc || '') + '</div>' + (a.url ? '<div class="item-card__meta">🔗 ' + CMS.eh(a.url) + '</div>' : '') + '</div>' +
+          actions(data.artistes, i, 'openArtiste', 'delArtiste', 'moveArtiste');
+        el.appendChild(d);
+      });
+    }
+    window.openArtiste = function (i) {
+      edit.artiste = i; pending.artiste = null;
+      var a = i === -1 ? {} : data.artistes[i];
+      document.getElementById('artisteTitle').textContent = i === -1 ? 'Nouvelle carte' : 'Modifier la carte';
+      setv('ar_nom', a.nom); setv('ar_desc', a.desc); setv('ar_categorie', a.categorie); setv('ar_bouton', a.bouton); setv('ar_url', a.url);
+      document.getElementById('ar_logo').checked = !!a.logo;
+      document.getElementById('ar_photoWrap').classList.toggle('contain', !!a.logo);
+      document.getElementById('ar_visible').checked = a.visible !== false;
+      document.getElementById('artiste_photoHint').textContent = 'JPG ou PNG.';
+      setPhoto('artiste', a.image || ''); openM('overlayArtiste');
+    };
+    window.saveArtiste = function () {
+      var nom = v('ar_nom').trim(); if (!nom) { alert('Le nom est obligatoire.'); return; }
+      var btn = document.getElementById('artisteSaveBtn'); btn.disabled = true;
+      var a = edit.artiste === -1 ? {} : data.artistes[edit.artiste];
+      a.nom = nom; a.desc = v('ar_desc').trim(); a.logo = chk('ar_logo'); a.categorie = v('ar_categorie').trim();
+      a.bouton = v('ar_bouton').trim(); a.url = v('ar_url').trim(); a.visible = chk('ar_visible');
+      if (pending.artiste) a.image = pending.artiste; if (a.image == null) a.image = '';
+      if (!a.id) a.id = 'ar' + Date.now();
+      if (edit.artiste === -1) data.artistes.push(a);
+      persist('Artistes : ' + nom).then(function () { closeM('overlayArtiste'); renderArtistes(); renderPhotos(); }).finally(function () { btn.disabled = false; });
+    };
+    window.delArtiste = function (i) { if (!confirm('Supprimer « ' + data.artistes[i].nom + ' » ?')) return; var n = data.artistes[i].nom; data.artistes.splice(i, 1); persist('Suppression artiste : ' + n).then(function () { renderArtistes(); renderPhotos(); }); };
+    window.moveArtiste = function (i, dir) { if (swap(data.artistes, i, dir)) { renderArtistes(); persist('Ordre des artistes'); } };
+
+    document.querySelectorAll('.overlay').forEach(function (o) { o.addEventListener('click', function (e) { if (e.target === o) o.classList.remove('open'); }); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.querySelectorAll('.overlay.open').forEach(function (o) { o.classList.remove('open'); }); });
+  })();
+  </script>
+</body>
+</html>

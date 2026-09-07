@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /asset 2/
+
+Sitemap: https://leberlinyons.fr/sitemap.xml

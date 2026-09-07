@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Administration — Le Berli'Nyons</title>
+  <link rel="icon" href="../assets/logo-hd.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+</head>
+<body>
+
+  <div id="loginScreen">
+    <img src="../assets/logo-hd.jpg" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover">
+    <div class="brand">Le Berli'Nyons</div>
+    <h1>Espace d'administration</h1>
+    <p>Connectez-vous pour gérer le contenu de votre site : carte, textes, photos, avis, horaires…</p>
+    <button class="btn-login" onclick="CMS.login()">Se connecter</button>
+  </div>
+
+  <div id="adminScreen">
+    <header class="hub-header">
+      <h1>Le Berli'Nyons — Administration</h1>
+      <div style="display:flex;gap:.75rem;align-items:center">
+        <a href="../index.html" target="_blank" class="btn btn-ghost btn-sm">Voir le site ↗</a>
+        <button class="btn-text" onclick="CMS.logout()">Déconnexion</button>
+      </div>
+    </header>
+
+    <div class="welcome">
+      <h2>Bonjour 👋</h2>
+      <p>Que souhaitez-vous modifier ? Vos changements apparaissent sur le site en ligne après environ 1 minute.</p>
+    </div>
+
+    <div class="hub">
+      <a href="carte.html" class="hub-card">
+        <div class="hub-card__icon">🥙</div>
+        <div class="hub-card__title">La carte &amp; les prix</div>
+        <div class="hub-card__desc">Formats, recettes, menus, suppléments, poutines &amp; mezzés.</div>
+        <div class="hub-card__arrow">Ouvrir →</div>
+      </a>
+
+      <a href="contenu.html?tab=textes" class="hub-card">
+        <div class="hub-card__icon">✏️</div>
+        <div class="hub-card__title">Textes du site</div>
+        <div class="hub-card__desc">Accueil, titres des sections, services, chiffres clés.</div>
+        <div class="hub-card__arrow">Ouvrir →</div>
+      </a>
+
+      <a href="contenu.html?tab=photos" class="hub-card">
+        <div class="hub-card__icon">📷</div>
+        <div class="hub-card__title">Photos du site</div>
+        <div class="hub-card__desc">Remplacer n'importe quelle photo : logo, accueil, plats, parcours, artistes, galerie.</div>
+        <div class="hub-card__arrow">Ouvrir →</div>
+      </a>
+
+      <a href="creations.html" class="hub-card">
+        <div class="hub-card__icon">🖼️</div>
+        <div class="hub-card__title">Galerie photos</div>
+        <div class="hub-card__desc">Ajouter, retirer ou réordonner les photos du bandeau défilant.</div>
+        <div class="hub-card__arrow">Ouvrir →</div>
+      </a>
+
+      <a href="contenu.html?tab=avis" class="hub-card">
+        <div class="hub-card__icon">⭐</div>
+        <div class="hub-card__title">Avis clients</div>
+        <div class="hub-card__desc">Témoignages affichés sur la page d'accueil : texte, auteur, note.</div>
+        <div class="hub-card__arrow">Ouvrir →</div>
+      </a>
+
+      <a href="contenu.html?tab=parcours" class="hub-card">
+        <div class="hub-card__icon">🗺️</div>
+        <div class="hub-card__title">Notre parcours</div>
+        <div class="hub-card__desc">Les étapes de l'histoire du Berli' : date, titre, texte, photo.</div>
+        <div class="hub-card__arrow">Ouvrir →</div>
+      </a>
+
+      <a href="contenu.html?tab=artistes" class="hub-card">
+        <div class="hub-card__icon">🎵</div>
+        <div class="hub-card__title">Artistes &amp; amis</div>
+        <div class="hub-card__desc">Les artistes, producteurs et partenaires mis en avant.</div>
+        <div class="hub-card__arrow">Ouvrir →</div>
+      </a>
+
+      <a href="infos.html" class="hub-card">
+        <div class="hub-card__icon">⚙️</div>
+        <div class="hub-card__title">Infos &amp; contact</div>
+        <div class="hub-card__desc">Horaires hiver / été, téléphone, adresse, réseaux sociaux, popup.</div>
+        <div class="hub-card__arrow">Ouvrir →</div>
+      </a>
+
+      <a href="legal.html" class="hub-card">
+        <div class="hub-card__icon">📄</div>
+        <div class="hub-card__title">Pages légales</div>
+        <div class="hub-card__desc">Mentions légales, politique de confidentialité, conditions d'utilisation.</div>
+        <div class="hub-card__arrow">Ouvrir →</div>
+      </a>
+    </div>
+  </div>
+
+  <script src="cms.js"></script>
+  <script>CMS.requireAuth();</script>
+</body>
+</html>

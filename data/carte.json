@@ -1,0 +1,134 @@
+{
+  "_commentaire": "La carte : formats, recettes, formules, suppléments, poutines & mezzés. Modifiable depuis /admin → La carte.",
+  "formats": [
+    {
+      "id": "fo1",
+      "nom": "Pain Boulanger",
+      "prix": "9,90€",
+      "badge": "Populaire",
+      "desc": "Notre pain frais livré chaque matin, croustillant à l'extérieur et moelleux à l'intérieur. Garni généreusement de viande döner, crudités fraîches et sauces maison. Le format classique et incontournable.",
+      "image": "assets/3.png",
+      "visible": true
+    },
+    {
+      "id": "fo2",
+      "nom": "Galette Wrap",
+      "prix": "9,90€",
+      "badge": "",
+      "desc": "Galette de blé grillée sur plaque, fine et croustillante. Roulée avec ta garniture, elle tient parfaitement en main. Le format street food par excellence, craquant à chaque bouchée.",
+      "image": "assets/1.png",
+      "visible": true
+    },
+    {
+      "id": "fo3",
+      "nom": "Assiette",
+      "prix": "9,90€",
+      "badge": "",
+      "desc": "Servie sans pain pour un repas plus léger. Salade fraîche, crudités de saison, viande döner tranchée et sauce au choix. Le format généreux pour ceux qui veulent profiter de chaque saveur.",
+      "image": "assets/2.png",
+      "visible": true
+    }
+  ],
+  "recettes": [
+    {
+      "id": "re1",
+      "nom": "Berli",
+      "badge": "La signature",
+      "style": "signature",
+      "desc": "Notre recette signature, inspirée de nos voyages en Turquie.",
+      "ingredients": ["Viande kebab marinée 24h", "Légumes de saison", "Feta", "Cacahuètes", "Sauce blanche maison"],
+      "allergenes": "sésame, arachide",
+      "supplement": "",
+      "visible": true
+    },
+    {
+      "id": "re2",
+      "nom": "Classi",
+      "badge": "Le classique",
+      "style": "",
+      "desc": "Le kebab traditionnel, avec des crudités fraîches et croquantes.",
+      "ingredients": ["Viande kebab marinée 24h", "Salade", "Tomate", "Oignon", "Coriandre fraîche", "Citron vert", "Sauce blanche maison"],
+      "allergenes": "lactose, gluten",
+      "supplement": "",
+      "visible": true
+    },
+    {
+      "id": "re3",
+      "nom": "Carni",
+      "badge": "+1€ · Le généreux",
+      "style": "carni",
+      "desc": "La portion XXL pour les plus gros appétits. Double viande, double plaisir.",
+      "ingredients": ["Viande kebab marinée 24h XXL", "Tomates", "Oignons", "Citron vert", "Coriandre fraîche", "Sauce blanche maison"],
+      "allergenes": "lactose",
+      "supplement": "Supplément +1€",
+      "visible": true
+    },
+    {
+      "id": "re4",
+      "nom": "Crispy",
+      "badge": "Poulet croustillant",
+      "style": "crispy",
+      "desc": "Du poulet croustillant pané maison, avec des légumes frais et de la feta.",
+      "ingredients": ["Croustillant de poulet", "Légumes de saison", "Feta", "Cacahuètes", "Sauce blanche maison"],
+      "allergenes": "sésame, arachide, gluten",
+      "supplement": "",
+      "visible": true
+    },
+    {
+      "id": "re5",
+      "nom": "Veggie",
+      "badge": "100% végétarien",
+      "style": "veggie",
+      "desc": "Notre option végétarienne, à base de falafels maison croustillants.",
+      "ingredients": ["Falafels maison", "Légumes de saison", "Feta", "Cacahuètes", "Sauce blanche maison"],
+      "allergenes": "fruits à coques, lactose, gluten",
+      "supplement": "",
+      "visible": true
+    },
+    {
+      "id": "re6",
+      "nom": "Mc Döner",
+      "badge": "Mc Döner du Berli",
+      "style": "mcdoner",
+      "desc": "Le burger à notre façon : croustillant de poulet, sauce fromagère et mayo.",
+      "ingredients": ["Croustillant de poulet", "Salade", "Oignons frits", "Sauce fromagère", "Mayonnaise"],
+      "allergenes": "lactose, moutarde, gluten",
+      "supplement": "",
+      "visible": true
+    }
+  ],
+  "formules": [
+    { "id": "fm1", "nom": "Seul", "prix": "9,90€", "detail": "Le plat uniquement", "highlight": false },
+    { "id": "fm2", "nom": "Menu Classique", "prix": "12,50€", "detail": "Plat + Frites + Boisson", "highlight": true },
+    { "id": "fm3", "nom": "Menu Spécial", "prix": "14,00€", "detail": "Plat + Frites + Bière / Vin / Maté", "highlight": false },
+    { "id": "fm4", "nom": "Menu Bivouak", "prix": "15,50€", "detail": "Plat + Frites + Bivouak bio", "highlight": false }
+  ],
+  "supplements": [
+    { "label": "Sup. Légumes", "prix": "+0,50€" },
+    { "label": "Sup. Viande / Feta", "prix": "+1€" }
+  ],
+  "aussi": [
+    {
+      "id": "au1",
+      "nom": "Nos Poutines",
+      "desc": "Frites fraîches nappées de sauce fromagère, garnies de viande et toppings au choix.",
+      "image": "assets/poutine.png",
+      "prix": [
+        { "label": "Classique", "prix": "6,50€" },
+        { "label": "XL", "prix": "8,50€" }
+      ],
+      "visible": true
+    },
+    {
+      "id": "au2",
+      "nom": "Nos Mezzés",
+      "desc": "Petites portions à grignoter ou à partager entre amis. Croustillant de poulet, kebab, falafels ou légumes.",
+      "image": "assets/mezze.jpg",
+      "prix": [
+        { "label": "Mezzé", "prix": "5,90€" },
+        { "label": "Grand Mezzé", "prix": "13€" }
+      ],
+      "visible": true
+    }
+  ]
+}

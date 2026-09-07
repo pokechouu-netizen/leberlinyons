@@ -1,0 +1,42 @@
+{
+  "_commentaire": "Coordonnées, horaires, réseaux sociaux et popup. Modifiable depuis /admin → Infos & contact.",
+  "adresse": "28 Rue des Grands Forts",
+  "code_postal": "26110",
+  "ville": "Nyons",
+  "telephone": "07 82 57 53 54",
+  "telephone_raw": "+33782575354",
+  "email": "leberlinyons@gmail.com",
+  "instagram": "https://www.instagram.com/leberlinyons/",
+  "facebook": "https://www.facebook.com/profile.php?id=100091706444599",
+  "avis_google_url": "https://www.google.com/search?q=Le%20Berli%27Nyons%20Nyons%20avis",
+  "horaires": {
+    "hiver": {
+      "detail": "Fermeture à 21h",
+      "lundi": "12h-14h / 19h-21h",
+      "mardi": "12h-14h / 19h-21h",
+      "mercredi": "12h-14h / 19h-21h",
+      "jeudi": "12h-14h / 19h-21h",
+      "vendredi": "12h-14h / 19h-21h",
+      "samedi": "Fermé",
+      "dimanche": "Fermé"
+    },
+    "ete": {
+      "detail": "Juillet – Août / Fermeture à 22h",
+      "lundi": "12h-14h30 / 19h-22h",
+      "mardi": "12h-14h30 / 19h-22h",
+      "mercredi": "12h-14h30 / 19h-22h",
+      "jeudi": "12h-14h30 / 19h-22h",
+      "vendredi": "12h-14h30 / 19h-22h",
+      "samedi": "12h-14h30 / 19h-22h",
+      "dimanche": "Fermé"
+    }
+  },
+  "popup": {
+    "actif": false,
+    "message": "🎉 Nouveauté : le menu Bivouak est arrivé !",
+    "cta_label": "Voir la carte",
+    "cta_url": "#menu",
+    "delai_secondes": 5
+  },
+  "netlify_hook": ""
+}
