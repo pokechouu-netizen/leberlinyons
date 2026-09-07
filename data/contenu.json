@@ -10,26 +10,19 @@
     "hero_note_google": "4.9",
     "hero_horaires_resume": "12h-14h30 / 19h-22h",
     "hero_image_badge": "Signature",
-
     "menu_title": "Des recettes généreuses",
     "menu_sub": "Préparées avec des ingrédients frais, chaque jour.",
     "menu_prix_base": "9,90€",
     "recettes_sub": "Disponibles en Pain Boulanger, Galette Wrap ou Assiette",
-
     "aussi_title": "Le Berli', c'est aussi...",
     "aussi_sub": "Des poutines généreuses et des mezzés à partager entre amis !",
-
     "parcours_title": "Le parcours de Théodore & Dorian",
     "parcours_intro": "C'est l'histoire de Dorian et Théodore, amis depuis la maternelle, réunis par la cuisine et le voyage. Ils partent en Turquie pour apprendre le vrai sens du kebab.\nChez Berli', tout est fait maison, influencée par le bassin méditerranéen, leur cuisine veut redonner ses lettres de noblesse au kebab.\nBerli', c'est plus qu'un lieu pour manger : c'est une communauté, une culture, et beaucoup d'amour.",
-
     "artistes_title": "Artistes qu'on aime",
     "artistes_sub": "La musique qui tourne au Berli.",
-
     "galerie_title": "Galerie",
     "galerie_sub": "Découvrez nos créations et l'ambiance du Berli'Nyons.",
-
     "avis_title": "Ce qu'en disent nos clients",
-
     "services_title": "Traiteur, événementiel & location",
     "services_sub": "Le Berli'Nyons se déplace aussi chez vous.",
     "service1_title": "Service traiteur & food truck",
@@ -38,10 +31,8 @@
     "service2_title": "Location de machines à broche",
     "service2_desc": "Louez nos machines à broche professionnelles, avec ou sans la broche fraîche montée selon votre demande. Idéal pour vos événements privés, fêtes ou rassemblements entre amis.",
     "service2_bouton": "Nous contacter",
-
     "communaute_title": "Les amis du Berli",
     "communaute_sub": "Nos clients, nos potes, notre famille. Rejoins la team sur Facebook !",
-
     "contact_title": "Contact & Horaires"
   },
   "photos": {
@@ -119,6 +110,15 @@
       "image": "assets/xander.jpeg",
       "cadrage": 20,
       "visible": true
+    },
+    {
+      "date": "jnefjenéfje",
+      "titre": "reggerzg",
+      "texte": "n j j knk",
+      "cadrage": 50,
+      "visible": true,
+      "image": "",
+      "id": "pa1788797257522"
     }
   ],
   "artistes": [
